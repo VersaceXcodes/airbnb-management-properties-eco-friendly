@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754994003169,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_SearchListings",
+      "version": "latest"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/components/views/UV_SearchListings.tsx",
+      "type": "text",
+      "size": 4742,
+      "dependencies": false
+    }
+  ]
+}

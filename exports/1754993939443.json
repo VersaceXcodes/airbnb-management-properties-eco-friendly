@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754993939443,
+  "operation": {
+    "id": "webapp:react:store",
+    "refs": {
+      "id": "redux",
+      "version": "1754993922795"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/store/main.tsx",
+      "type": "text",
+      "size": 5671,
+      "dependencies": false
+    }
+  ]
+}

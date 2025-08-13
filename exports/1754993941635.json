@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754993941635,
+  "operation": {
+    "id": "settings:config:package"
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/package.json",
+      "type": "text",
+      "size": 2980,
+      "dependencies": true
+    }
+  ]
+}
