@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import pkg from 'pg';
 import morgan from 'morgan';
+import fs from 'fs';
 import { userSchema, createUserInputSchema, profileSchema, 
          updateProfileInputSchema } from './schema.ts';
 import type { ZodTypeAny } from 'zod';
@@ -52,8 +53,12 @@ app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('combined'));
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from the 'public' directory if present
+const publicDir = path.join(__dirname, 'public');
+const publicIndex = path.join(publicDir, 'index.html');
+if (fs.existsSync(publicIndex)) {
+  app.use(express.static(publicDir));
+}
 
 // Middleware
 declare module 'express-serve-static-core' {
