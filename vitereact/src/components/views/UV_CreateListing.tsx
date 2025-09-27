@@ -2,7 +2,17 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
-import { createPropertyInputSchema } from '@schema';
+import { z } from 'zod';
+
+const createPropertyInputSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().min(1),
+  location: z.string().min(1),
+  amenities: z.array(z.string()).default([]),
+  eco_rating: z.number().min(0).max(5).default(0),
+});
+
+type NewListing = z.infer<typeof createPropertyInputSchema>;
 
 const UV_CreateListing: React.FC = () => {
   const [name, setName] = useState('');
@@ -12,48 +22,46 @@ const UV_CreateListing: React.FC = () => {
   const [ecoRating, setEcoRating] = useState(0);
 
   const auth_token = useAppStore(state => state.authentication_state.auth_token);
-  const errorMessage = useAppStore(state => state.authentication_state.error_message);
   
-  const mutation = useMutation((newListing) => {
-    return axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties`, newListing, {
-      headers: {
-        'Authorization': `Bearer ${auth_token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-  }, {
+  const mutation = useMutation({
+    mutationFn: async (newListing: NewListing) => {
+      return axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties`, newListing, {
+        headers: {
+          'Authorization': `Bearer ${auth_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    },
     onSuccess: () => {
-      // Reset form on success or navigate elsewhere as needed
       setName('');
       setDescription('');
       setLocation('');
       setAmenities([]);
       setEcoRating(0);
-      // Add logic to redirect or update UI
     },
     onError: (error: any) => {
       console.error('Error creating property:', error);
-      // Handle error appropriately
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate inputs using Zod or equivalent
-    const validated = createPropertyInputSchema.safeParse({ name, description, location, amenities });
+    const toValidate: NewListing = {
+      name,
+      description,
+      location,
+      amenities,
+      eco_rating: ecoRating,
+    };
+
+    const validated = createPropertyInputSchema.safeParse(toValidate);
     if (!validated.success) {
       console.error('Validation error:', validated.error);
       return;
     }
 
-    mutation.mutate({
-      name,
-      description,
-      location,
-      amenities,
-      eco_rating: ecoRating
-    });
+    mutation.mutate(validated.data);
   };
 
   return (
@@ -64,9 +72,9 @@ const UV_CreateListing: React.FC = () => {
             Create New Property Listing
           </h2>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {mutation.error && (
+            {(mutation as any).error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md" aria-live="polite">
-                <p className="text-sm">Failed to create property: {(mutation.error as any).message}</p>
+                <p className="text-sm">Failed to create property: {((mutation as any).error as any)?.message}</p>
               </div>
             )}
             <div className="rounded-md shadow-sm -space-y-px">
@@ -115,7 +123,7 @@ const UV_CreateListing: React.FC = () => {
                   name="amenities"
                   type="text"
                   value={amenities.join(', ')}
-                  onChange={(e) => setAmenities(e.target.value.split(',').map(item => item.trim()))}
+                  onChange={(e) => setAmenities(e.target.value.split(',').map(item => item.trim()).filter(Boolean))}
                   placeholder="Amenities (separate with commas)"
                   className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 />
@@ -139,10 +147,10 @@ const UV_CreateListing: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={mutation.isLoading}
+                disabled={(mutation as any).isPending}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mutation.isLoading ? 'Submitting...' : 'Submit New Listing'}
+                {(mutation as any).isPending ? 'Submitting...' : 'Submit New Listing'}
               </button>
             </div>
           </form>

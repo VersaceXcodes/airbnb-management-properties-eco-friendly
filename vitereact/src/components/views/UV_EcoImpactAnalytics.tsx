@@ -33,14 +33,12 @@ const fetchEcoImpactAnalytics = async (authToken: string): Promise<EcoImpactData
 const UV_EcoImpactAnalytics: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
 
-  const { data: ecoImpactData, isLoading, isError, refetch } = useQuery(
-    ['eco-impact-analytics'],
-    () => fetchEcoImpactAnalytics(authToken ?? ''),
-    {
-      enabled: !!authToken,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data: ecoImpactData, isLoading, isError, refetch } = useQuery<EcoImpactData[], Error>({
+    queryKey: ['eco-impact-analytics'],
+    queryFn: () => fetchEcoImpactAnalytics(authToken ?? ''),
+    enabled: !!authToken,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (!authToken) {

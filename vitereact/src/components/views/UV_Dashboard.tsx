@@ -28,16 +28,15 @@ const UV_Dashboard: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
   const currentUser = useAppStore(state => state.authentication_state.current_user);
   
-  const { data: ecoMetrics, isLoading, isError } = useQuery<EcoMetrics, Error>(
-    ['dashboardData'],
-    () => fetchDashboardData(authToken || ''),
-    { enabled: !!authToken }
-  );
+  const { data: ecoMetrics, isLoading, isError } = useQuery<EcoMetrics, Error>({
+    queryKey: ['dashboardData'],
+    queryFn: () => fetchDashboardData(authToken || ''),
+    enabled: !!authToken,
+  });
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    // Simulated notifications
     setNotifications([
       { message: 'Low inventory on cleaning supplies', type: 'alert' },
       { message: 'New guest booking received', type: 'info' },

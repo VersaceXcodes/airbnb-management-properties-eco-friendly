@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
@@ -8,26 +7,18 @@ interface EcoTip {
   tips: string[];
 }
 
-// TODO: Endpoint not found in OpenAPI spec / Backend Server main code
 const fetchEcoGuide = async (): Promise<EcoTip[]> => {
-  // Using mock data since endpoint /eco-tips does not exist in specs
   return [
-    {
-      category: 'Recycling',
-      tips: ['Use recycling bins', 'Sort waste by category'],
-    },
-    {
-      category: 'Energy Saving',
-      tips: ['Turn off lights when not needed', 'Use energy-efficient appliances'],
-    },
+    { category: 'Recycling', tips: ['Use recycling bins', 'Sort waste by category'] },
+    { category: 'Energy Saving', tips: ['Turn off lights when not needed', 'Use energy-efficient appliances'] },
   ];
 };
 
 const UV_EcoGuide: React.FC = () => {
-  const { data: eco_tips, isLoading, isError, error } = useQuery<EcoTip[], Error>(
-    ['eco_tips'],
-    fetchEcoGuide
-  );
+  const { data: eco_tips, isLoading, isError, error } = useQuery<EcoTip[], Error>({
+    queryKey: ['eco_tips'],
+    queryFn: fetchEcoGuide,
+  });
 
   return (
     <>
@@ -44,7 +35,7 @@ const UV_EcoGuide: React.FC = () => {
           {isError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
               <strong className="font-bold">Error:</strong>
-              <span className="block sm:inline">{error.message}</span>
+              <span className="block sm:inline">{error?.message}</span>
             </div>
           )}
 

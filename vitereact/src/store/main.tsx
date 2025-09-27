@@ -8,6 +8,8 @@ interface User {
   email: string;
   name: string;
   created_at: string;
+  bio?: string | null;
+  avatar_url?: string | null;
 }
 
 interface AuthenticationState {
@@ -27,9 +29,19 @@ interface EcoFilterState {
   location: string | null;
 }
 
+interface CalendarBooking {
+  date: string;
+  status: string;
+  property_id: string;
+}
+
+type Section = 'home' | 'properties' | 'reports' | 'messages' | 'profile';
+
 interface AppState {
   authentication_state: AuthenticationState;
   eco_filter_state: EcoFilterState;
+  highlighted_section: Section;
+  property_calendar: CalendarBooking[];
   
   // Auth Actions
   login_user: (email: string, password: string) => Promise<void>;
@@ -41,6 +53,9 @@ interface AppState {
   
   // Eco-filter actions
   set_eco_filters: (filters: Partial<EcoFilterState>) => void;
+
+  // UI actions
+  set_highlighted_section: (section: Section) => void;
 }
 
 // Store
@@ -63,6 +78,8 @@ export const useAppStore = create<AppState>()(
         amenities: [],
         location: null,
       },
+      highlighted_section: 'home',
+      property_calendar: [],
 
       // Auth Actions
       login_user: async (email: string, password: string) => {
@@ -81,7 +98,7 @@ export const useAppStore = create<AppState>()(
           const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`, { email, password }, { headers: { 'Content-Type': 'application/json' } });
           const { user, auth_token } = response.data;
 
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: user,
               auth_token: auth_token,
@@ -94,7 +111,7 @@ export const useAppStore = create<AppState>()(
           }));
         } catch (error: any) {
           const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: null,
               auth_token: null,
@@ -107,6 +124,63 @@ export const useAppStore = create<AppState>()(
           }));
           throw new Error(errorMessage);
         }
+      },
+
+      register_user: async (email: string, password: string, name: string) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            authentication_status: {
+              ...state.authentication_state.authentication_status,
+              is_loading: true,
+            },
+            error_message: null,
+          },
+        }));
+        try {
+          const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`, { email, password, name }, { headers: { 'Content-Type': 'application/json' } });
+          const { user, auth_token } = response.data;
+          set(() => ({
+            authentication_state: {
+              current_user: user,
+              auth_token,
+              authentication_status: { is_authenticated: true, is_loading: false },
+              error_message: null,
+            },
+          }));
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+          set((state) => ({
+            authentication_state: {
+              ...state.authentication_state,
+              authentication_status: { is_authenticated: false, is_loading: false },
+              error_message: errorMessage,
+              current_user: null,
+              auth_token: null,
+            },
+          }));
+          throw new Error(errorMessage);
+        }
+      },
+
+      clear_auth_error: () => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            error_message: null,
+          },
+        }));
+      },
+
+      update_user_profile: (userData: Partial<User>) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            current_user: state.authentication_state.current_user
+              ? { ...state.authentication_state.current_user, ...userData }
+              : null,
+          },
+        }));
       },
 
       initialize_auth: async () => {
@@ -130,7 +204,7 @@ export const useAppStore = create<AppState>()(
           const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`, { headers: { Authorization: `Bearer ${token}` } });
           const { user } = response.data;
 
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: user,
               auth_token: token,
@@ -141,8 +215,8 @@ export const useAppStore = create<AppState>()(
               error_message: null,
             },
           }));
-        } catch (error) {
-          set((state) => ({
+        } catch {
+          set(() => ({
             authentication_state: {
               current_user: null,
               auth_token: null,
@@ -157,7 +231,7 @@ export const useAppStore = create<AppState>()(
       },
 
       logout_user: () => {
-        set((state) => ({
+        set(() => ({
           authentication_state: {
             current_user: null,
             auth_token: null,
@@ -179,6 +253,11 @@ export const useAppStore = create<AppState>()(
           },
         }));
       },
+
+      // UI actions
+      set_highlighted_section: (section: Section) => {
+        set(() => ({ highlighted_section: section }));
+      },
     }),
     {
       name: 'ecohost-auth-storage',
@@ -193,6 +272,8 @@ export const useAppStore = create<AppState>()(
           error_message: null,
         },
         eco_filter_state: state.eco_filter_state,
+        highlighted_section: state.highlighted_section,
+        property_calendar: state.property_calendar,
       }),
     }
   )
