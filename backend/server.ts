@@ -250,8 +250,11 @@ app.post('/feedback', async (req, res) => {
   }
 });
 
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use((req, res, next) => {
+  if (fs.existsSync(publicIndex)) {
+    return res.sendFile(publicIndex);
+  }
+  next();
 });
 
 app.listen(port, '0.0.0.0', () => {
