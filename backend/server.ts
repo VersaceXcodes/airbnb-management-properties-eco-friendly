@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
@@ -6,7 +7,16 @@ import pkg from 'pg';
 import morgan from 'morgan';
 import { userSchema, createUserInputSchema, profileSchema, 
          updateProfileInputSchema } from './schema.ts';
-import { zodValidator } from './middlewares/validation.js';
+import type { ZodTypeAny } from 'zod';
+
+// Simple Zod validation middleware
+const zodValidator = (schema: ZodTypeAny) => (req: Request, res: Response, next: NextFunction) => {
+  const result = schema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.flatten() });
+  }
+  next();
+};
 
 dotenv.config();
 const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key' } = process.env;
@@ -17,7 +27,7 @@ const pool = new Pool(
   DATABASE_URL
     ? {
         connectionString: DATABASE_URL,
-        ssl: { require: true }
+        ssl: { rejectUnauthorized: false },
       }
     : {
         host: PGHOST,
@@ -25,7 +35,7 @@ const pool = new Pool(
         user: PGUSER,
         password: PGPASSWORD,
         port: Number(PGPORT),
-        ssl: { require: true },
+        ssl: { rejectUnauthorized: false },
       }
 );
 
@@ -37,7 +47,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('combined'));
@@ -46,7 +56,13 @@ app.use(morgan('combined'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
-const authenticateToken = (req, res, next) => {
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: { user_id: number; email: string };
+  }
+}
+
+const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   
@@ -54,9 +70,9 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid or expired token' });
-    req.user = user;
+    req.user = decoded as any;
     next();
   });
 };
@@ -156,29 +172,37 @@ app.put('/users/profile', authenticateToken, zodValidator(updateProfileInputSche
 });
 
 app.get('/properties', async (req, res) => {
-  const { eco_rating_min, eco_rating_max, amenities, location } = req.query;
+  const { eco_rating_min, eco_rating_max, amenities, location } = req.query as Record<string, string | undefined>;
+
+  // coerce to numbers/strings safely
 
   let baseQuery = 'SELECT * FROM properties WHERE true';
   const queryParams = [];
 
   if (eco_rating_min) {
-    queryParams.push(Number(eco_rating_min));
-    baseQuery += ` AND eco_rating >= $${queryParams.length}`;
+    const min = Number(eco_rating_min);
+    if (!Number.isNaN(min)) {
+      queryParams.push(min);
+      baseQuery += ` AND eco_rating >= $${queryParams.length}`;
+    }
   }
 
   if (eco_rating_max) {
-    queryParams.push(Number(eco_rating_max));
-    baseQuery += ` AND eco_rating <= $${queryParams.length}`;
+    const max = Number(eco_rating_max);
+    if (!Number.isNaN(max)) {
+      queryParams.push(max);
+      baseQuery += ` AND eco_rating <= $${queryParams.length}`;
+    }
   }
 
   if (amenities) {
-    const amenitiesArray = amenities.split(',');
+    const amenitiesArray = String(amenities).split(',');
     queryParams.push(amenitiesArray);
     baseQuery += ` AND amenities @> $${queryParams.length}::text[]`;
   }
 
   if (location) {
-    queryParams.push(`%${location}%`);
+    queryParams.push(`%${String(location)}%`);
     baseQuery += ` AND location ILIKE $${queryParams.length}`;
   }
 
