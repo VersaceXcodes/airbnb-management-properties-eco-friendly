@@ -37,15 +37,15 @@ describe('Auth E2E (register -> logout -> sign-in)', () => {
       const password = 'P@ssw0rd123!';
 
       // 1) Register the user via the real backend API
-      const registerResp = await axios.post(
-        `${API_BASE}/auth/register`,
-        {
+      const registerResp = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           username,
           email,
           password_hash: password,
-        },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+        }),
+      });
       expect(registerResp.status).toBe(201);
 
       // 2) Render the auth view and sign in
