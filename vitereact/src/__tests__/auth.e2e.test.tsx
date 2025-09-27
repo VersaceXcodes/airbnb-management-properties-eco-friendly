@@ -3,7 +3,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import axios from 'axios';
 
 import UV_Login from '@/components/views/UV_Login.tsx';
 import { useAppStore } from '@/store/main';

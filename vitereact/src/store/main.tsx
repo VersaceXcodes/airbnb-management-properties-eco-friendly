@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import axios from 'axios';
 
 // Types
 export interface User {
@@ -95,8 +94,17 @@ export const useAppStore = create<AppState>()(
         }));
 
         try {
-          const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`, { email, password }, { headers: { 'Content-Type': 'application/json' } });
-          const { user, auth_token } = response.data;
+          const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+          if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            const errorMessage = err?.message || `Login failed (${resp.status})`;
+            throw new Error(errorMessage);
+          }
+          const { user, auth_token } = await resp.json();
 
           set(() => ({
             authentication_state: {
@@ -110,7 +118,7 @@ export const useAppStore = create<AppState>()(
             },
           }));
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+          const errorMessage = error?.message || 'Login failed';
           set(() => ({
             authentication_state: {
               current_user: null,
@@ -138,8 +146,17 @@ export const useAppStore = create<AppState>()(
           },
         }));
         try {
-          const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`, { email, password, name }, { headers: { 'Content-Type': 'application/json' } });
-          const { user, auth_token } = response.data;
+          const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, name }),
+          });
+          if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            const errorMessage = err?.message || `Registration failed (${resp.status})`;
+            throw new Error(errorMessage);
+          }
+          const { user, auth_token } = await resp.json();
           set(() => ({
             authentication_state: {
               current_user: user,
@@ -149,7 +166,7 @@ export const useAppStore = create<AppState>()(
             },
           }));
         } catch (error: any) {
-          const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+          const errorMessage = error?.message || 'Registration failed';
           set((state) => ({
             authentication_state: {
               ...state.authentication_state,
@@ -201,8 +218,9 @@ export const useAppStore = create<AppState>()(
         }
 
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`, { headers: { Authorization: `Bearer ${token}` } });
-          const { user } = response.data;
+          const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`, { headers: { Authorization: `Bearer ${token}` } });
+          if (!resp.ok) throw new Error('Unauthorized');
+          const { user } = await resp.json();
 
           set(() => ({
             authentication_state: {
