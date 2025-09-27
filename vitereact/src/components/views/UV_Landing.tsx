@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAppStore } from '@/store/main'; // For Zustand state
 
 const UV_Landing: React.FC = () => {
-  const { is_authenticated } = useAppStore((state) => state.authentication_state.authentication_status);
+  // Note: We do not need authentication state on landing page
   const landing_user_message = 'Welcome to EcoHost! Join us in creating eco-friendly stays.';
 
   return (

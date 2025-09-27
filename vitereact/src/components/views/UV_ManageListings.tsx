@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
 import { Link } from 'react-router-dom';
 
-// Define based on API response from OpenAPI spec
 interface Property {
   id: string;
   name: string;
@@ -14,37 +13,30 @@ interface Property {
 
 const fetchProperties = async (token: string): Promise<Property[]> => {
   const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
-  return data.map((property: any) => ({
-    id: property.id,
-    name: property.name,
-    eco_rating: property.eco_rating,
-    status: property.status,
-  }));
+  return data.map((property: any) => ({ id: property.id, name: property.name, eco_rating: property.eco_rating, status: property.status }));
 };
 
 const UV_ManageListings: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
   const queryClient = useQueryClient();
 
-  const { data: properties = [], isLoading, isError, error } = useQuery<Property[]>(['properties'], () => fetchProperties(authToken!), {
+  const { data: properties = [], isLoading, isError, error } = useQuery<Property[], Error>({
+    queryKey: ['properties'],
+    queryFn: () => fetchProperties(authToken || ''),
     enabled: !!authToken,
-    onError: (err) => {
-      console.error('Failed to fetch properties', err);
-    },
   });
 
-  const deletePropertyMutation = useMutation(
-    (propertyId: string) => axios.delete(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties/${propertyId}`, {
-      headers: { Authorization: `Bearer ${authToken}` }
-    }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['properties']);
-      },
-    }
-  );
+  const deletePropertyMutation = useMutation({
+    mutationFn: (propertyId: string) =>
+      axios.delete(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties/${propertyId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    },
+  });
 
   const handleDeleteProperty = (propertyId: string) => {
     if (window.confirm('Are you sure you want to delete this property?')) {

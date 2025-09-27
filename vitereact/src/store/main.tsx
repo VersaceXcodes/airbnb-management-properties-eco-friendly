@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
 // Types
-interface User {
+export interface User {
   id: string;
   email: string;
   name: string;

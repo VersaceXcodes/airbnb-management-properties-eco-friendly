@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { useAppStore } from '@/store/main';
+// import { useAppStore } from '@/store/main';
 import { z } from 'zod';
 
 const propertySchema = z.object({
@@ -31,20 +31,17 @@ const UV_SearchListings: React.FC = () => {
     location: '',
   });
 
-  const ecoFilterState = useAppStore((state) => state.eco_filter_state);
+  // const ecoFilterState = useAppStore((state) => state.eco_filter_state);
 
   const updateFilter = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const { data: listings, isLoading, isError } = useQuery<Property[], Error>(
-    ['properties', filters],
-    () => fetchProperties(filters),
-    {
-      enabled: !!filters,
-      onError: (error) => console.error('Error fetching properties:', error),
-    }
-  );
+  const { data: listings, isLoading, isError } = useQuery<Property[], Error>({
+    queryKey: ['properties', filters],
+    queryFn: () => fetchProperties(filters),
+    enabled: !!filters,
+  });
 
   const handleSearch = () => {
     // Manually trigger a query refetch if necessary
@@ -99,9 +96,9 @@ const UV_SearchListings: React.FC = () => {
               {isLoading && <p className="text-center">Loading properties...</p>}
               {isError && <p className="text-center text-red-500">Error loading properties.</p>}
 
-              {!isLoading && !isError && listings?.length > 0 && (
+              {!isLoading && !isError && (listings ?? []).length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {listings.map((listing) => (
+                  {(listings ?? []).map((listing) => (
                     <div key={listing.id} className="border p-4 rounded bg-gray-50">
                       <h2 className="font-bold">{listing.name}</h2>
                       <p>{listing.description}</p>
@@ -113,7 +110,9 @@ const UV_SearchListings: React.FC = () => {
                 </div>
               )}
 
-              {listings?.length === 0 && <p className="text-center">No properties found.</p>}
+              {(listings ?? []).length === 0 && !isLoading && !isError && (
+                <p className="text-center">No properties found.</p>
+              )}
             </div>
 
             <div className="mt-8 flex justify-center">

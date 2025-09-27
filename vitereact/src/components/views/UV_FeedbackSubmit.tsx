@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
 import { z } from 'zod';
-import { commentSchema } from '@/DB/zodschemas';
 import { Link } from 'react-router-dom';
+
+// Local zod schema to validate feedback input
+const commentSchema = { comment: z.string().min(1).max(1000) };
 
 const UV_FeedbackSubmit: React.FC = () => {
   const [feedback, setFeedback] = useState('');
@@ -32,7 +34,7 @@ const UV_FeedbackSubmit: React.FC = () => {
         setErrorMsg(error.response?.data?.message || 'Failed to submit feedback');
       }
     },
-    onError: (error) => {
+    onError: () => {
       setErrorMsg('An error occurred during submission. Please try again.');
     },
   });

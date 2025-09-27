@@ -1,50 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { useAppStore } from '@/store/main';
+import { useAppStore, User } from '@/store/main';
 
 const UV_Profile: React.FC = () => {
-  // Zustand State Access
   const authToken = useAppStore(state => state.authentication_state.auth_token);
   const updateUserProfileInStore = useAppStore(state => state.update_user_profile);
 
-  // Local State
   const [bio, setBio] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // API Fetch: Get User Profile
   const fetchUserProfile = async (): Promise<User> => {
-    const { data } = await axios.get(`${process.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/profile`, {
+    const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/profile`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
-    return data;
+    return data as User;
   };
 
-  const { data: currentUser, isLoading, error } = useQuery<User, Error>(
-    ['userProfile'],
-    fetchUserProfile,
-    {
-      onSuccess: data => {
-        if (data) {
-          setBio(data.bio || '');
-          setAvatarUrl(data.avatar_url || '');
-        }
-      },
-    }
-  );
+  const { data: currentUser, isLoading, error } = useQuery<User, Error>({
+    queryKey: ['userProfile'],
+    queryFn: fetchUserProfile,
+  });
 
-  // API Mutation: Update User Profile
-  const mutation = useMutation<void, Error, { bio: string | null; avatar_url: string | null }>(
-    (profileUpdates) =>
-      axios.put(`${process.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/profile`, profileUpdates, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }),
-    {
-      onSuccess: () => {
-        updateUserProfileInStore({ bio, avatar_url: avatarUrl });
-      },
+  React.useEffect(() => {
+    if (currentUser) {
+      setBio(currentUser.bio ?? '');
+      setAvatarUrl(currentUser.avatar_url ?? '');
     }
-  );
+  }, [currentUser]);
+
+  const mutation = useMutation({
+    mutationFn: async (profileUpdates: { bio: string | null; avatar_url: string | null }) => {
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/profile`, profileUpdates, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+    },
+    onSuccess: () => {
+      updateUserProfileInStore({ bio, avatar_url: avatarUrl });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,9 +51,7 @@ const UV_Profile: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Profile Settings</h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Edit your profile details
-            </p>
+            <p className="mt-2 text-center text-sm text-gray-600">Edit your profile details</p>
           </div>
 
           {isLoading ? (
@@ -72,9 +64,9 @@ const UV_Profile: React.FC = () => {
             </div>
           ) : (
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-              {mutation.isError && (
+              {(mutation as any).isError && (
                 <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4 text-red-700">
-                  <p>{mutation.error?.message || 'Error updating the profile'}</p>
+                  <p>{(mutation as any).error?.message || 'Error updating the profile'}</p>
                 </div>
               )}
 
@@ -85,7 +77,7 @@ const UV_Profile: React.FC = () => {
                     id="bio"
                     name="bio"
                     type="text"
-                    value={bio || ''}
+                    value={bio ?? ''}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Your Bio"
                     className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
@@ -97,7 +89,7 @@ const UV_Profile: React.FC = () => {
                     id="avatar-url"
                     name="avatar-url"
                     type="url"
-                    value={avatarUrl || ''}
+                    value={avatarUrl ?? ''}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="Avatar URL"
                     className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
@@ -108,10 +100,10 @@ const UV_Profile: React.FC = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={mutation.isLoading}
+                  disabled={(mutation as any).isPending}
                   className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
-                  {mutation.isLoading ? 'Updating...' : 'Update Profile'}
+                  {(mutation as any).isPending ? 'Updating...' : 'Update Profile'}
                 </button>
               </div>
             </form>

@@ -5,88 +5,78 @@ import { useAppStore } from '@/store/main';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
-// Zod schemas for type safety
 const messageSchema = z.array(
   z.object({
     id: z.string(),
     content: z.string(),
-    timestamp: z.string()
+    timestamp: z.string(),
   })
 );
 
 const feedbackInputSchema = z.object({
   property_id: z.string(),
   user_id: z.string(),
-  feedback: z.string()
+  feedback: z.string(),
 });
 
 const UV_GuestManagement: React.FC = () => {
   const queryClient = useQueryClient();
-  
-  // Zustate store hooks
   const auth_token = useAppStore((state) => state.authentication_state.auth_token);
   const current_user = useAppStore((state) => state.authentication_state.current_user);
 
-  // Local component states
   const [guestMessages, setGuestMessages] = useState<{ id: string; content: string; timestamp: string }[]>([]);
   const [feedbackContent, setFeedbackContent] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch guest messages
   const fetchGuestMessages = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/guest-messages`, {
-        headers: {
-          Authorization: `Bearer ${auth_token}`
-        }
+        headers: { Authorization: `Bearer ${auth_token}` },
       });
       const validatedData = messageSchema.parse(data.messages);
       setGuestMessages(validatedData);
-    } catch (err) {
+    } catch {
       setError('Failed to load guest messages');
     }
   };
 
-  const { isLoading: messagesLoading, refetch: refetchMessages } = useQuery(['guestMessages'], fetchGuestMessages, {
+  const { isLoading: messagesLoading } = useQuery({
+    queryKey: ['guestMessages'],
+    queryFn: fetchGuestMessages,
     enabled: !!auth_token,
   });
 
-  // Submit feedback mutation
   const submitFeedback = async () => {
-    try {
-      const validatedInput = feedbackInputSchema.parse({
-        property_id: selectedPropertyId,
-        user_id: current_user?.id || '',
-        feedback: feedbackContent
-      });
+    const validatedInput = feedbackInputSchema.parse({
+      property_id: selectedPropertyId ?? '',
+      user_id: current_user?.id || '',
+      feedback: feedbackContent,
+    });
 
-      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/feedback`, validatedInput, {
-        headers: {
-          Authorization: `Bearer ${auth_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      setFeedbackContent('');
-      setSelectedPropertyId(null);
-      alert('Feedback submitted successfully');
-      return data;
-    } catch (err) {
-      setError('Failed to submit feedback');
-    }
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/feedback`,
+      validatedInput,
+      {
+        headers: { Authorization: `Bearer ${auth_token}`, 'Content-Type': 'application/json' },
+      }
+    );
+    setFeedbackContent('');
+    setSelectedPropertyId(null);
+    alert('Feedback submitted successfully');
+    return data;
   };
 
-  const { mutate: submitFeedbackMutation, isLoading: feedbackLoading } = useMutation(submitFeedback, {
+  const { mutate: submitFeedbackMutation, isPending: feedbackLoading } = useMutation({
+    mutationFn: submitFeedback,
     onSuccess: () => {
-      queryClient.invalidateQueries(['guestMessages']);
-    }
+      queryClient.invalidateQueries({ queryKey: ['guestMessages'] });
+    },
+    onError: () => setError('Failed to submit feedback'),
   });
 
-  // Fetch messages on component mount
   useEffect(() => {
-    if (auth_token) {
-      fetchGuestMessages();
-    }
+    if (auth_token) fetchGuestMessages();
   }, [auth_token]);
 
   return (

@@ -27,11 +27,11 @@ const fetchInventoryItems = async (authToken: string): Promise<InventoryItem[]> 
 const UV_InventoryManagement: React.FC = () => {
   const [authToken] = useAppStore(state => [state.authentication_state.auth_token]);
 
-  const { data: inventoryItems, isLoading, isError, refetch } = useQuery<InventoryItem[], Error>(
-    ['inventoryItems'],
-    () => fetchInventoryItems(authToken as string),
-    { enabled: !!authToken } // Only run if authToken is available
-  );
+  const { data: inventoryItems, isLoading, isError, refetch } = useQuery<InventoryItem[], Error>({
+    queryKey: ['inventoryItems', authToken],
+    queryFn: () => fetchInventoryItems(authToken as string),
+    enabled: !!authToken // Only run if authToken is available
+  });
 
   return (
     <>
