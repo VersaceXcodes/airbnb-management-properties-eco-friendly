@@ -12,21 +12,13 @@ COPY vitereact ./
 RUN rm -rf dist/ public/ build/
 RUN npm run build
 
-# Stage 2: Set up the Node.js backend
-FROM node:18
-WORKDIR /app/backend
-# Copy package files and install production dependencies
-COPY backend/package.json  ./
-# Install dependencies
-RUN npm install --production
-# Copy the backend files
-COPY backend ./
-# Copy the frontend build output to a directory served by the backend
-COPY --from=frontend-build /app/vitereact/public /app/backend/public
-# Expose the port the backend will run on
-EXPOSE 3000
-# Set environment variables
-ENV PORT=3000
-ENV HOST=0.0.0.0
-# Command to start the backend server - make sure it listens on all interfaces
-CMD ["sh", "-c", "node initdb.js && npx tsx server.ts"]
+# Stage 2: Serve the frontend with a lightweight server
+FROM nginx:alpine
+# Copy the built frontend from the build stage
+COPY --from=frontend-build /app/vitereact/dist /usr/share/nginx/html
+# Copy nginx configuration if needed
+# COPY nginx.conf /etc/nginx/nginx.conf
+# Expose port 80
+EXPOSE 80
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
