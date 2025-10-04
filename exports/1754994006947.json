@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754994006947,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_CalendarManagement",
+      "version": "latest"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/components/views/UV_CalendarManagement.tsx",
+      "type": "text",
+      "size": 2582,
+      "dependencies": false
+    }
+  ]
+}

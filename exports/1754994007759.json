@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754994007759,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_TopNavigation",
+      "version": "latest"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/components/views/GV_TopNavigation.tsx",
+      "type": "text",
+      "size": 3676,
+      "dependencies": false
+    }
+  ]
+}

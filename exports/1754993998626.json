@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754993998626,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "UV_EcoImpactAnalytics",
+      "version": "latest"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/components/views/UV_EcoImpactAnalytics.tsx",
+      "type": "text",
+      "size": 4124,
+      "dependencies": false
+    }
+  ]
+}

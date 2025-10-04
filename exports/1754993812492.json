@@ -1,0 +1,15 @@
+{
+  "timestamp": 1754993812492,
+  "operation": {
+    "id": "backend:specifications:openapi"
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/backend/openapi.yaml",
+      "type": "text",
+      "size": 10599,
+      "dependencies": false
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+asyncapi: 2.0.0
+info:
+  title: EcoHost Realtime API
+  version: 1.0.0
+  description: AsyncAPI specification for EcoHost's realtime features focusing on
+    eco-friendly Airbnb property management.
+servers:
+  - url: http://localhost:3000
+    protocol: ws
+    description: Development server
+channels:
+  authentication/state:
+    description: Channel for broadcasting authentication state changes.
+    subscribe:
+      operationId: onAuthenticationStateChange
+      message:
+        $ref: "#/components/messages/AuthenticationStateChange"
+  properties/updates:
+    description: Channel for broadcasting property listing updates.
+    subscribe:
+      operationId: onPropertyUpdate
+      message:
+        $ref: "#/components/messages/PropertyUpdate"
+  calendar/availability:
+    description: Channel for updates on property booking availability.
+    subscribe:
+      operationId: onCalendarAvailabilityUpdate
+      message:
+        $ref: "#/components/messages/CalendarAvailabilityUpdate"
+  analytics/eco-impact:
+    description: Channel for updates to eco-impact analytics.
+    subscribe:
+      operationId: onEcoImpactAnalyticsUpdate
+      message:
+        $ref: "#/components/messages/EcoImpactAnalyticsUpdate"
+  feedback/eco-experience:
+    description: Channel for receiving eco-experience feedback updates.
+    subscribe:
+      operationId: onEcoExperienceFeedback
+      message:
+        $ref: "#/components/messages/EcoExperienceFeedback"
+components:
+  messages:
+    AuthenticationStateChange:
+      summary: Authentication state update message
+      payload:
+        type: object
+        properties:
+          current_user:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+            nullable: true
+          auth_token:
+            type: string
+            nullable: true
+          authentication_status:
+            type: object
+            properties:
+              is_authenticated:
+                type: boolean
+              is_loading:
+                type: boolean
+          error_message:
+            type: string
+            nullable: true
+        required:
+          - authentication_status
+    PropertyUpdate:
+      summary: Property listing update message
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+          user_id:
+            type: string
+          description:
+            type: string
+          amenities:
+            type: array
+            items:
+              type: string
+          eco_features:
+            type: array
+            items:
+              type: string
+        required:
+          - id
+          - user_id
+    CalendarAvailabilityUpdate:
+      summary: Calendar availability update message
+      payload:
+        type: object
+        properties:
+          property_id:
+            type: string
+          available_dates:
+            type: array
+            items:
+              type: string
+        required:
+          - property_id
+          - available_dates
+    EcoImpactAnalyticsUpdate:
+      summary: Eco-impact analytics update message
+      payload:
+        type: object
+        properties:
+          property_id:
+            type: string
+          carbon_footprint:
+            type: number
+            format: double
+          energy_savings:
+            type: number
+            format: double
+          water_usage:
+            type: number
+            format: double
+        required:
+          - property_id
+    EcoExperienceFeedback:
+      summary: Feedback on eco-experience message
+      payload:
+        type: object
+        properties:
+          feedback_id:
+            type: string
+          property_id:
+            type: string
+          user_id:
+            type: string
+          comments:
+            type: string
+          eco_rating:
+            type: number
+            minimum: 0
+            maximum: 5
+        required:
+          - feedback_id
+          - property_id
+          - user_id
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        password_hash:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - email
+        - password_hash
+        - created_at
+    profile:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - created_at
+    post:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - title
+        - content
+        - created_at
+    comment:
+      type: object
+      properties:
+        id:
+          type: string
+        post_id:
+          type: string
+        user_id:
+          type: string
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - post_id
+        - user_id
+        - comment
+        - created_at
+    like:
+      type: object
+      properties:
+        id:
+          type: string
+        post_id:
+          type: string
+        user_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - post_id
+        - user_id
+        - created_at

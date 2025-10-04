@@ -1,0 +1,19 @@
+{
+  "timestamp": 1754994013356,
+  "operation": {
+    "id": "webapp:react:views",
+    "refs": {
+      "id": "GV_Footer",
+      "version": "latest"
+    }
+  },
+  "projectId": "airbnb-management-properties-eco-friendly",
+  "files": [
+    {
+      "path": "/mnt/data/airbnb-management-properties-eco-friendly/vitereact/src/components/views/GV_Footer.tsx",
+      "type": "text",
+      "size": 2504,
+      "dependencies": false
+    }
+  ]
+}
