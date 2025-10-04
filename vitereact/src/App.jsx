@@ -1,24 +1,46 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { useAppStore } from './store/main'
+import UV_Auth from './components/views/UV_Auth'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+function HomePage() {
+  const { authentication_state, logout } = useAppStore()
+  const { is_authenticated } = authentication_state.authentication_status
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   return (
-    <>
-      <div>
-        <h1>Airbnb Management</h1>
-        <h2>Eco-Friendly Properties</h2>
+    <div>
+      <h1>Airbnb Management</h1>
+      <h2>Eco-Friendly Properties</h2>
+      
+      {is_authenticated ? (
         <div className="card">
-          <button onClick={() => setCount((count) => count + 1)}>
-            Properties managed: {count}
-          </button>
-          <p>
-            Welcome to your eco-friendly property management platform
-          </p>
+          <p>Welcome! You are signed in.</p>
+          <button onClick={handleLogout}>Logout</button>
         </div>
-      </div>
-    </>
+      ) : (
+        <div className="card">
+          <p>Welcome to your eco-friendly property management platform</p>
+          <Link to="/login">
+            <button>Sign In</button>
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<UV_Auth />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
