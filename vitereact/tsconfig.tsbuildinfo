@@ -1,1 +1,1 @@
-{"root":["./src/vite-env.d.ts","./src/components/views/UV_Auth.tsx","./src/components/views/UV_Register.tsx","./src/components/views/UV_SignIn.tsx","./src/store/main.tsx","./src/test/setup.ts"],"version":"5.9.3"}
+{"root":["./src/vite-env.d.ts","./src/__tests__/auth.e2e.test.tsx","./src/components/views/UV_Auth.tsx","./src/components/views/UV_Register.tsx","./src/components/views/UV_SignIn.tsx","./src/store/main.tsx","./src/test/setup.ts"],"version":"5.9.3"}
