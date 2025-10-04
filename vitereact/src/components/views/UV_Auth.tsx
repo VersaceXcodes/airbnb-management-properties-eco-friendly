@@ -23,7 +23,7 @@ const UV_Auth: React.FC = () => {
         await register(email, password);
       }
       navigate('/');
-    } catch (error) {
+    } catch {
     }
   };
 

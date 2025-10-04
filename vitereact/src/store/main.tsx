@@ -14,7 +14,9 @@ interface AuthenticationState {
 
 interface AppState {
   authentication_state: AuthenticationState
-  register: (email: string, password: string) => Promise<void>
+  current_user: { email: string; name?: string } | null
+  current_workspace: unknown | null
+  register: (email: string, password: string, name?: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   logout: () => void
 }
@@ -31,8 +33,10 @@ export const useAppStore = create<AppState>((set) => ({
     error_message: null,
     user_email: null,
   },
+  current_user: null,
+  current_workspace: null,
 
-  register: async (email: string, password: string) => {
+  register: async (email: string, password: string, name?: string) => {
     set((state) => ({
       authentication_state: {
         ...state.authentication_state,
@@ -48,7 +52,7 @@ export const useAppStore = create<AppState>((set) => ({
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name }),
       })
 
       if (!response.ok) {
@@ -69,6 +73,7 @@ export const useAppStore = create<AppState>((set) => ({
           },
           error_message: null,
         },
+        current_user: { email, name },
       }))
     } catch (error) {
       set((state) => ({
@@ -122,6 +127,7 @@ export const useAppStore = create<AppState>((set) => ({
           },
           error_message: null,
         },
+        current_user: { email },
       }))
     } catch (error) {
       set((state) => ({
@@ -150,6 +156,8 @@ export const useAppStore = create<AppState>((set) => ({
         },
         error_message: null,
       },
+      current_user: null,
+      current_workspace: null,
     }))
   },
 }))
