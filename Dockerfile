@@ -1,15 +1,11 @@
 # Stage 1: Build the Vite React frontend
 FROM node:18 AS frontend-build
 WORKDIR /app/vitereact
-# Copy package files and install dependencies with --legacy-peer-deps
-COPY vitereact/package.json  ./
-RUN npm install --legacy-peer-deps
-RUN npm install --save-dev eslint-plugin-import eslint-plugin-react @typescript-eslint/parser @typescript-eslint/eslint-plugin
-RUN npm install --save-dev eslint-import-resolver-typescript
+# Copy package files and install dependencies
+COPY vitereact/package.json ./
+RUN npm install
 # Copy the rest of the frontend files and build
 COPY vitereact ./
-# Clear any existing build artifacts to force fresh build
-RUN rm -rf dist/ public/ build/
 RUN npm run build
 
 # Stage 2: Serve the frontend with a lightweight server
