@@ -24,6 +24,7 @@ const UV_Auth: React.FC = () => {
       }
       navigate('/');
     } catch {
+      // Error is already handled in the store
     }
   };
 
