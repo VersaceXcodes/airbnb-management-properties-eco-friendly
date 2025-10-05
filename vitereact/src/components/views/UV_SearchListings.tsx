@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { useAppStore } from '@/store/main';
+
 import { z } from 'zod';
 
 const propertySchema = z.object({
@@ -31,7 +31,7 @@ const UV_SearchListings: React.FC = () => {
     location: '',
   });
 
-  const ecoFilterState = useAppStore((state) => state.eco_filter_state);
+
 
   const updateFilter = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

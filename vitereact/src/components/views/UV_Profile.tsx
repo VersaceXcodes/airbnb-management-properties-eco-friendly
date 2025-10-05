@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
+import { User } from '@/schema';
 
 const UV_Profile: React.FC = () => {
   // Zustand State Access
@@ -20,31 +21,29 @@ const UV_Profile: React.FC = () => {
     return data;
   };
 
-  const { data: currentUser, isLoading, error } = useQuery<User, Error>(
-    ['userProfile'],
-    fetchUserProfile,
-    {
-      onSuccess: data => {
-        if (data) {
-          setBio(data.bio || '');
-          setAvatarUrl(data.avatar_url || '');
-        }
-      },
+  const { data: currentUser, isLoading, error } = useQuery<User, Error>({
+    queryKey: ['userProfile'],
+    queryFn: fetchUserProfile,
+    enabled: !!authToken
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      setBio(currentUser.bio || '');
+      setAvatarUrl(currentUser.avatar_url || '');
     }
-  );
+  }, [currentUser]);
 
   // API Mutation: Update User Profile
-  const mutation = useMutation<void, Error, { bio: string | null; avatar_url: string | null }>(
-    (profileUpdates) =>
+  const mutation = useMutation<void, Error, { bio: string | null; avatar_url: string | null }>({
+    mutationFn: (profileUpdates) =>
       axios.put(`${process.env.VITE_API_BASE_URL || 'http://localhost:3000'}/users/profile`, profileUpdates, {
         headers: { Authorization: `Bearer ${authToken}` },
       }),
-    {
-      onSuccess: () => {
-        updateUserProfileInStore({ bio, avatar_url: avatarUrl });
-      },
-    }
-  );
+    onSuccess: () => {
+      updateUserProfileInStore({ bio, avatar_url: avatarUrl });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,10 +107,10 @@ const UV_Profile: React.FC = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={mutation.isLoading}
+                  disabled={mutation.isPending}
                   className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
-                  {mutation.isLoading ? 'Updating...' : 'Update Profile'}
+                  {mutation.isPending ? 'Updating...' : 'Update Profile'}
                 </button>
               </div>
             </form>

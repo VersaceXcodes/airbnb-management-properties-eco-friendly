@@ -43,12 +43,12 @@ const UV_GuestManagement: React.FC = () => {
       });
       const validatedData = messageSchema.parse(data.messages);
       setGuestMessages(validatedData);
-    } catch (err) {
+    } catch {
       setError('Failed to load guest messages');
     }
   };
 
-  const { isLoading: messagesLoading, refetch: refetchMessages } = useQuery(['guestMessages'], fetchGuestMessages, {
+  const { isLoading: messagesLoading } = useQuery(['guestMessages'], fetchGuestMessages, {
     enabled: !!auth_token,
   });
 
@@ -71,7 +71,7 @@ const UV_GuestManagement: React.FC = () => {
       setSelectedPropertyId(null);
       alert('Feedback submitted successfully');
       return data;
-    } catch (err) {
+    } catch {
       setError('Failed to submit feedback');
     }
   };

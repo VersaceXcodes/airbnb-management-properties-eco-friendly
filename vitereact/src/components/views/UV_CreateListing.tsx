@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppStore } from '@/store/main';
-import { createPropertyInputSchema } from '@schema';
+import { createPropertyInputSchema } from '@/schema';
 
 const UV_CreateListing: React.FC = () => {
   const [name, setName] = useState('');
@@ -12,16 +12,17 @@ const UV_CreateListing: React.FC = () => {
   const [ecoRating, setEcoRating] = useState(0);
 
   const auth_token = useAppStore(state => state.authentication_state.auth_token);
-  const errorMessage = useAppStore(state => state.authentication_state.error_message);
+
   
-  const mutation = useMutation((newListing) => {
-    return axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties`, newListing, {
-      headers: {
-        'Authorization': `Bearer ${auth_token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-  }, {
+  const mutation = useMutation({
+    mutationFn: (newListing: any) => {
+      return axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/properties`, newListing, {
+        headers: {
+          'Authorization': `Bearer ${auth_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    },
     onSuccess: () => {
       // Reset form on success or navigate elsewhere as needed
       setName('');
@@ -139,10 +140,10 @@ const UV_CreateListing: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mutation.isLoading ? 'Submitting...' : 'Submit New Listing'}
+                {mutation.isPending ? 'Submitting...' : 'Submit New Listing'}
               </button>
             </div>
           </form>

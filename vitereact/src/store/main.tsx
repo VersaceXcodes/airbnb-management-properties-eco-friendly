@@ -30,6 +30,8 @@ interface EcoFilterState {
 interface AppState {
   authentication_state: AuthenticationState;
   eco_filter_state: EcoFilterState;
+  highlighted_section?: string;
+  property_calendar?: any;
   
   // Auth Actions
   login_user: (email: string, password: string) => Promise<void>;
@@ -63,6 +65,8 @@ export const useAppStore = create<AppState>()(
         amenities: [],
         location: null,
       },
+      highlighted_section: undefined,
+      property_calendar: undefined,
 
       // Auth Actions
       login_user: async (email: string, password: string) => {
@@ -141,7 +145,7 @@ export const useAppStore = create<AppState>()(
               error_message: null,
             },
           }));
-        } catch (error) {
+        } catch {
           set((state) => ({
             authentication_state: {
               current_user: null,
@@ -157,7 +161,7 @@ export const useAppStore = create<AppState>()(
       },
 
       logout_user: () => {
-        set((state) => ({
+        set(() => ({
           authentication_state: {
             current_user: null,
             auth_token: null,
@@ -166,6 +170,78 @@ export const useAppStore = create<AppState>()(
               is_loading: false,
             },
             error_message: null,
+          },
+          eco_filter_state: {
+            eco_rating_min: 0,
+            eco_rating_max: 5,
+            amenities: [],
+            location: null,
+          },
+          highlighted_section: undefined,
+          property_calendar: undefined,
+        }));
+      },
+
+      register_user: async (email: string, password: string, name: string) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            authentication_status: {
+              ...state.authentication_state.authentication_status,
+              is_loading: true,
+            },
+            error_message: null,
+          },
+        }));
+
+        try {
+          const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`, { email, password, name }, { headers: { 'Content-Type': 'application/json' } });
+          const { user, auth_token } = response.data;
+
+          set((state) => ({
+            authentication_state: {
+              current_user: user,
+              auth_token: auth_token,
+              authentication_status: {
+                is_authenticated: true,
+                is_loading: false,
+              },
+              error_message: null,
+            },
+          }));
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+          set((state) => ({
+            authentication_state: {
+              current_user: null,
+              auth_token: null,
+              authentication_status: {
+                is_authenticated: false,
+                is_loading: false,
+              },
+              error_message: errorMessage,
+            },
+          }));
+          throw new Error(errorMessage);
+        }
+      },
+
+      clear_auth_error: () => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            error_message: null,
+          },
+        }));
+      },
+
+      update_user_profile: (userData: Partial<User>) => {
+        set((state) => ({
+          authentication_state: {
+            ...state.authentication_state,
+            current_user: state.authentication_state.current_user 
+              ? { ...state.authentication_state.current_user, ...userData }
+              : null,
           },
         }));
       },

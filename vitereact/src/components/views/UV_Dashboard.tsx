@@ -3,16 +3,7 @@ import { useAppStore } from '@/store/main';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-
-interface EcoMetrics {
-  carbon_footprint: number;
-  water_savings: number;
-}
-
-interface Notification {
-  message: string;
-  type: string;
-}
+import { EcoMetrics, Notification } from '@/schema';
 
 const fetchDashboardData = async (token: string): Promise<EcoMetrics> => {
   const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/dashboard/overview`, {
@@ -21,6 +12,8 @@ const fetchDashboardData = async (token: string): Promise<EcoMetrics> => {
   return {
     carbon_footprint: data.eco_metrics.carbon_footprint,
     water_savings: data.eco_metrics.water_savings,
+    energy_efficiency: data.eco_metrics.energy_efficiency || 0,
+    waste_reduction: data.eco_metrics.waste_reduction || 0,
   };
 };
 
@@ -28,19 +21,19 @@ const UV_Dashboard: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
   const currentUser = useAppStore(state => state.authentication_state.current_user);
   
-  const { data: ecoMetrics, isLoading, isError } = useQuery<EcoMetrics, Error>(
-    ['dashboardData'],
-    () => fetchDashboardData(authToken || ''),
-    { enabled: !!authToken }
-  );
+  const { data: ecoMetrics, isLoading, isError } = useQuery<EcoMetrics, Error>({
+    queryKey: ['dashboardData'],
+    queryFn: () => fetchDashboardData(authToken || ''),
+    enabled: !!authToken
+  });
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     // Simulated notifications
     setNotifications([
-      { message: 'Low inventory on cleaning supplies', type: 'alert' },
-      { message: 'New guest booking received', type: 'info' },
+      { id: '1', message: 'Low inventory on cleaning supplies', type: 'warning', created_at: new Date().toISOString() },
+      { id: '2', message: 'New guest booking received', type: 'info', created_at: new Date().toISOString() },
     ]);
   }, []);
 
@@ -87,8 +80,8 @@ const UV_Dashboard: React.FC = () => {
               <div className="bg-white shadow rounded-lg p-4">
                 <h2 className="text-xl font-semibold mb-4">Notifications</h2>
                 <ul>
-                  {notifications.map((notification, index) => (
-                    <li key={index} className={`p-2 mb-3 border rounded ${notification.type === 'alert' ? 'bg-red-100 border-red-500' : 'bg-blue-100 border-blue-500'}`}>
+                  {notifications.map((notification) => (
+                    <li key={notification.id} className={`p-2 mb-3 border rounded ${notification.type === 'warning' ? 'bg-red-100 border-red-500' : 'bg-blue-100 border-blue-500'}`}>
                       {notification.message}
                     </li>
                   ))}

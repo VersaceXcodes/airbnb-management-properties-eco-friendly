@@ -15,8 +15,8 @@ const UV_CalendarManagement: React.FC = () => {
 
   const [calendarData, setCalendarData] = useState<Booking[]>(propertyCalendar);
 
-  const mutation = useMutation(
-    async (propertyIds: string[]) => {
+  const mutation = useMutation({
+    mutationFn: async (propertyIds: string[]) => {
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/calendar/sync`,
         { property_id: propertyIds },
@@ -28,16 +28,14 @@ const UV_CalendarManagement: React.FC = () => {
       );
       return data;
     },
-    {
-      onSuccess: (data) => {
-        setCalendarData(data.updatedDates.map((date: Booking) => ({
-          date: date.date,
-          status: date.status,
-          property_id: date.property_id
-        })));
-      }
+    onSuccess: (data) => {
+      setCalendarData(data.updatedDates.map((date: Booking) => ({
+        date: date.date,
+        status: date.status,
+        property_id: date.property_id
+      })));
     }
-  );
+  });
 
   const handleSync = () => {
     const propertyIds = propertyCalendar.map(calendar => calendar.property_id);
@@ -58,10 +56,10 @@ const UV_CalendarManagement: React.FC = () => {
           <div className="mb-4">
             <button
               onClick={handleSync}
-              disabled={mutation.isLoading}
+              disabled={mutation.isPending}
               className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
             >
-              {mutation.isLoading ? 'Syncing...' : 'Synchronize with Airbnb'}
+              {mutation.isPending ? 'Syncing...' : 'Synchronize with Airbnb'}
             </button>
           </div>
           <div aria-live="polite">

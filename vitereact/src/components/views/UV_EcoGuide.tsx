@@ -1,12 +1,7 @@
-import React, { useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-
-interface EcoTip {
-  category: string;
-  tips: string[];
-}
+import { EcoTip } from '@/schema';
 
 // TODO: Endpoint not found in OpenAPI spec / Backend Server main code
 const fetchEcoGuide = async (): Promise<EcoTip[]> => {
@@ -24,10 +19,10 @@ const fetchEcoGuide = async (): Promise<EcoTip[]> => {
 };
 
 const UV_EcoGuide: React.FC = () => {
-  const { data: eco_tips, isLoading, isError, error } = useQuery<EcoTip[], Error>(
-    ['eco_tips'],
-    fetchEcoGuide
-  );
+  const { data: eco_tips, isLoading, isError, error } = useQuery<EcoTip[], Error>({
+    queryKey: ['eco_tips'],
+    queryFn: fetchEcoGuide
+  });
 
   return (
     <>

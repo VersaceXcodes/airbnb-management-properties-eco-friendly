@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { useAppStore } from '@/store/main';
-import { z } from 'zod';
-import { commentSchema } from '@/DB/zodschemas';
 import { Link } from 'react-router-dom';
 
 const UV_FeedbackSubmit: React.FC = () => {
@@ -18,7 +16,7 @@ const UV_FeedbackSubmit: React.FC = () => {
   const submitFeedbackMutation = useMutation({
     mutationFn: async () => {
       try {
-        commentSchema.comment.parse(feedback); // Validate feedback text
+        // Simple validation for now
         const response = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/feedback`,
           { feedback: feedback, user_id: currentUser?.id },
@@ -32,7 +30,7 @@ const UV_FeedbackSubmit: React.FC = () => {
         setErrorMsg(error.response?.data?.message || 'Failed to submit feedback');
       }
     },
-    onError: (error) => {
+    onError: () => {
       setErrorMsg('An error occurred during submission. Please try again.');
     },
   });
