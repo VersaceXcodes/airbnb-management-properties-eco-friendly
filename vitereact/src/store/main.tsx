@@ -7,6 +7,8 @@ interface User {
   id: string;
   email: string;
   name: string;
+  bio?: string | null;
+  avatar_url?: string | null;
   created_at: string;
 }
 
@@ -85,7 +87,7 @@ export const useAppStore = create<AppState>()(
           const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/login`, { email, password }, { headers: { 'Content-Type': 'application/json' } });
           const { user, auth_token } = response.data;
 
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: user,
               auth_token: auth_token,
@@ -98,7 +100,7 @@ export const useAppStore = create<AppState>()(
           }));
         } catch (error: any) {
           const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: null,
               auth_token: null,
@@ -134,7 +136,7 @@ export const useAppStore = create<AppState>()(
           const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/verify`, { headers: { Authorization: `Bearer ${token}` } });
           const { user } = response.data;
 
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: user,
               auth_token: token,
@@ -146,7 +148,7 @@ export const useAppStore = create<AppState>()(
             },
           }));
         } catch {
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: null,
               auth_token: null,
@@ -198,7 +200,7 @@ export const useAppStore = create<AppState>()(
           const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/register`, { email, password, name }, { headers: { 'Content-Type': 'application/json' } });
           const { user, auth_token } = response.data;
 
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: user,
               auth_token: auth_token,
@@ -211,7 +213,7 @@ export const useAppStore = create<AppState>()(
           }));
         } catch (error: any) {
           const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-          set((state) => ({
+          set(() => ({
             authentication_state: {
               current_user: null,
               auth_token: null,

@@ -15,9 +15,9 @@ const UV_EcoRating: React.FC = () => {
   const auth_token = useAppStore(state => state.authentication_state.auth_token);
   
   // Use react-query to fetch eco-ratings
-  const { data, isLoading, isError, refetch } = useQuery<EcoRating[], Error>(
-    ['eco-ratings'],
-    async () => {
+  const { data, isLoading, isError, refetch } = useQuery<EcoRating[], Error>({
+    queryKey: ['eco-ratings'],
+    queryFn: async () => {
       const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/eco-ratings`, {
         headers: {
           Authorization: `Bearer ${auth_token}`,
@@ -28,10 +28,8 @@ const UV_EcoRating: React.FC = () => {
         eco_rating: rating.eco_rating,
       }));
     },
-    {
-      enabled: !!auth_token, // Only run query if auth_token is present
-    }
-  );
+    enabled: !!auth_token,
+  });
 
   return (
     <>

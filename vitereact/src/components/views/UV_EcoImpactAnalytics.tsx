@@ -33,14 +33,12 @@ const fetchEcoImpactAnalytics = async (authToken: string): Promise<EcoImpactData
 const UV_EcoImpactAnalytics: React.FC = () => {
   const authToken = useAppStore(state => state.authentication_state.auth_token);
 
-  const { data: ecoImpactData, isLoading, isError, refetch } = useQuery(
-    ['eco-impact-analytics'],
-    () => fetchEcoImpactAnalytics(authToken ?? ''),
-    {
-      enabled: !!authToken,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data: ecoImpactData, isLoading, isError, refetch } = useQuery({
+    queryKey: ['eco-impact-analytics'],
+    queryFn: () => fetchEcoImpactAnalytics(authToken ?? ''),
+    enabled: !!authToken,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (!authToken) {
@@ -67,7 +65,7 @@ const UV_EcoImpactAnalytics: React.FC = () => {
               <p className="text-red-500">Error fetching eco-impact data. Please try again.</p>
             </div>
           )}
-          {ecoImpactData && !isLoading && !isError && (
+          {ecoImpactData && Array.isArray(ecoImpactData) && !isLoading && !isError && (
             <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
               {/* Example visualization placeholder */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

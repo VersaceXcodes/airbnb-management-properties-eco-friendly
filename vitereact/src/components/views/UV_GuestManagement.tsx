@@ -48,7 +48,9 @@ const UV_GuestManagement: React.FC = () => {
     }
   };
 
-  const { isLoading: messagesLoading } = useQuery(['guestMessages'], fetchGuestMessages, {
+  const { isLoading: messagesLoading } = useQuery({
+    queryKey: ['guestMessages'],
+    queryFn: fetchGuestMessages,
     enabled: !!auth_token,
   });
 
@@ -76,9 +78,10 @@ const UV_GuestManagement: React.FC = () => {
     }
   };
 
-  const { mutate: submitFeedbackMutation, isLoading: feedbackLoading } = useMutation(submitFeedback, {
+  const { mutate: submitFeedbackMutation, isPending: feedbackLoading } = useMutation({
+    mutationFn: submitFeedback,
     onSuccess: () => {
-      queryClient.invalidateQueries(['guestMessages']);
+      queryClient.invalidateQueries({ queryKey: ['guestMessages'] });
     }
   });
 
@@ -87,6 +90,7 @@ const UV_GuestManagement: React.FC = () => {
     if (auth_token) {
       fetchGuestMessages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth_token]);
 
   return (
