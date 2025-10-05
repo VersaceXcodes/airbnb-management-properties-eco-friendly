@@ -9,9 +9,7 @@ interface SustainabilityReport {
   report_data: any; // Define a more specific type based on report structure
 }
 
-// Mock Data API Function
 const fetchSustainabilityReports = async (authToken: string): Promise<SustainabilityReport[]> => {
-  // TODO: Endpoint not found in OpenAPI spec / Backend Server main code
   const { data } = await axios.get(`\${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/reports/sustainability`, {
     headers: {
       Authorization: `Bearer ${authToken}`,

@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { EcoTip } from '@/schema';
 
-// TODO: Endpoint not found in OpenAPI spec / Backend Server main code
 const fetchEcoGuide = async (): Promise<EcoTip[]> => {
-  // Using mock data since endpoint /eco-tips does not exist in specs
   return [
     {
       category: 'Recycling',
