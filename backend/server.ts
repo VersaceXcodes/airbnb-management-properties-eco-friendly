@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
@@ -6,7 +6,14 @@ import pkg from 'pg';
 import morgan from 'morgan';
 import { userSchema, createUserInputSchema, profileSchema, 
          updateProfileInputSchema } from './schema.ts';
-import { zodValidator } from './middlewares/validation.js';
+import { zodValidator } from './middlewares/validation.ts';
+
+interface AuthRequest extends Request {
+  user?: {
+    user_id: number;
+    email: string;
+  };
+}
 
 dotenv.config();
 const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key' } = process.env;
@@ -17,7 +24,7 @@ const pool = new Pool(
   DATABASE_URL
     ? {
         connectionString: DATABASE_URL,
-        ssl: { require: true }
+        ssl: { rejectUnauthorized: false }
       }
     : {
         host: PGHOST,
@@ -25,7 +32,7 @@ const pool = new Pool(
         user: PGUSER,
         password: PGPASSWORD,
         port: Number(PGPORT),
-        ssl: { require: true },
+        ssl: { rejectUnauthorized: false },
       }
 );
 
@@ -37,7 +44,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('combined'));
@@ -45,8 +52,7 @@ app.use(morgan('combined'));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware
-const authenticateToken = (req, res, next) => {
+const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   
@@ -56,7 +62,7 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: 'Invalid or expired token' });
-    req.user = user;
+    req.user = user as { user_id: number; email: string };
     next();
   });
 };
@@ -116,10 +122,9 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// Get User Profile
-app.get('/users/profile', authenticateToken, async (req, res) => {
+app.get('/users/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const { user_id } = req.user;
+    const { user_id } = req.user!;
     const result = await pool.query('SELECT * FROM profiles WHERE user_id = $1', [user_id]);
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Profile not found' });
@@ -132,10 +137,9 @@ app.get('/users/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Update User Profile
-app.put('/users/profile', authenticateToken, zodValidator(updateProfileInputSchema), async (req, res) => {
+app.put('/users/profile', authenticateToken, zodValidator(updateProfileInputSchema), async (req: AuthRequest, res: Response) => {
   const { bio, avatar_url } = req.body;
-  const { user_id } = req.user;
+  const { user_id } = req.user!;
 
   try {
     const result = await pool.query(
@@ -155,11 +159,11 @@ app.put('/users/profile', authenticateToken, zodValidator(updateProfileInputSche
   }
 });
 
-app.get('/properties', async (req, res) => {
+app.get('/properties', async (req: Request, res: Response) => {
   const { eco_rating_min, eco_rating_max, amenities, location } = req.query;
 
   let baseQuery = 'SELECT * FROM properties WHERE true';
-  const queryParams = [];
+  const queryParams: any[] = [];
 
   if (eco_rating_min) {
     queryParams.push(Number(eco_rating_min));
@@ -171,13 +175,13 @@ app.get('/properties', async (req, res) => {
     baseQuery += ` AND eco_rating <= $${queryParams.length}`;
   }
 
-  if (amenities) {
+  if (amenities && typeof amenities === 'string') {
     const amenitiesArray = amenities.split(',');
     queryParams.push(amenitiesArray);
     baseQuery += ` AND amenities @> $${queryParams.length}::text[]`;
   }
 
-  if (location) {
+  if (location && typeof location === 'string') {
     queryParams.push(`%${location}%`);
     baseQuery += ` AND location ILIKE $${queryParams.length}`;
   }
