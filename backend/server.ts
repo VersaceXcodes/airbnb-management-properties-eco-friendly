@@ -4,8 +4,9 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import pkg from 'pg';
 import morgan from 'morgan';
+import bcrypt from 'bcryptjs';
 import { userSchema, createUserInputSchema, profileSchema, 
-         updateProfileInputSchema } from './schema.ts';
+         updateProfileInputSchema, registerInputSchema, loginInputSchema } from './schema.ts';
 import { zodValidator } from './middlewares/validation.ts';
 
 interface AuthRequest extends Request {
@@ -16,25 +17,35 @@ interface AuthRequest extends Request {
 }
 
 dotenv.config();
-const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key' } = process.env;
+const { DATABASE_URL, PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGPORT = 5432, JWT_SECRET = 'your-secret-key', USE_PGLITE } = process.env;
 
 const { Pool } = pkg;
 
-const pool = new Pool(
-  DATABASE_URL
-    ? {
-        connectionString: DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-      }
-    : {
-        host: PGHOST,
-        database: PGDATABASE,
-        user: PGUSER,
-        password: PGPASSWORD,
-        port: Number(PGPORT),
-        ssl: { rejectUnauthorized: false },
-      }
-);
+let pool: any;
+const usePGlite = USE_PGLITE === 'true' || (PGHOST === 'localhost' && !DATABASE_URL);
+
+if (usePGlite) {
+  const { PGlitePool } = await import('./pglite-setup.ts');
+  pool = new PGlitePool();
+  console.log('Using PGlite for database');
+} else {
+  pool = new Pool(
+    DATABASE_URL
+      ? {
+          connectionString: DATABASE_URL,
+          ssl: { rejectUnauthorized: false }
+        }
+      : {
+          host: PGHOST,
+          database: PGDATABASE,
+          user: PGUSER,
+          password: PGPASSWORD,
+          port: Number(PGPORT),
+          ssl: { rejectUnauthorized: false },
+        }
+  );
+  console.log('Using PostgreSQL for database');
+}
 
 const app = express();
 
@@ -70,13 +81,15 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
 // Routes
 
 // Register endpoint
-app.post('/auth/register', zodValidator(createUserInputSchema), async (req, res) => {
+app.post('/auth/register', zodValidator(registerInputSchema), async (req, res) => {
   try {
-    const { username, email, password_hash } = req.body;
+    const { name, email, password } = req.body;
    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
     const result = await pool.query(
       'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email, created_at',
-      [username.toLowerCase(), email.toLowerCase(), password_hash]
+      [name.toLowerCase(), email.toLowerCase(), hashedPassword]
     );
 
     const user = result.rows[0];
@@ -95,7 +108,7 @@ app.post('/auth/register', zodValidator(createUserInputSchema), async (req, res)
 });
 
 // Login endpoint
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', zodValidator(loginInputSchema), async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -105,7 +118,8 @@ app.post('/auth/login', async (req, res) => {
     }
 
     const user = result.rows[0];
-    if (user.password_hash !== password) {
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 

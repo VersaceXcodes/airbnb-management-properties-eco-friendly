@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -92,7 +92,7 @@ describe('Auth E2E Tests (Real API)', () => {
       expect(screen.getByRole('heading', { name: /create your account/i })).toBeInTheDocument();
     });
 
-    let nameInput = screen.getByPlaceholderText(/full name/i);
+    const nameInput = screen.getByPlaceholderText(/full name/i);
     let emailInput = screen.getByPlaceholderText(/email address/i);
     let passwordInput = screen.getByPlaceholderText(/password/i);
     let submitButton = screen.getByRole('button', { name: /create account/i });
@@ -121,6 +121,7 @@ describe('Auth E2E Tests (Real API)', () => {
       expect(state.authentication_state.current_user).toBeNull();
     });
 
+    cleanup();
     render(<UV_Login />, { wrapper: Wrapper });
 
     await waitFor(() => {

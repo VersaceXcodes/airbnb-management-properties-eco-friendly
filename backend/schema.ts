@@ -160,6 +160,18 @@ export const searchLikeInputSchema = z.object({
   sort_order: z.enum(['asc', 'desc']).default('desc')
 });
 
+// Auth schemas
+export const registerInputSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email().min(1).max(255),
+  password: z.string().min(6).max(255),
+});
+
+export const loginInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
 // inferred types for entities
 export type User = z.infer<typeof userSchema>;
 export type Profile = z.infer<typeof profileSchema>;
