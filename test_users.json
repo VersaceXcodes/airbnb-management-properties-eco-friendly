@@ -1,0 +1,120 @@
+{
+  "generated_at": "2025-01-20T10:30:00Z",
+  "user_structure": {
+    "table_name": "users",
+    "role_field": null,
+    "registration_endpoint": "/auth/register",
+    "login_endpoint": "/auth/login",
+    "verify_endpoint": "/auth/verify",
+    "note": "This application does not have explicit role fields. All users have the same permissions."
+  },
+  "total_users": 4,
+  "verified_users": 4,
+  "users": [
+    {
+      "id": 1,
+      "username": "alice",
+      "email": "alice@example.com",
+      "password": "Password123!",
+      "role": "user",
+      "verified": true,
+      "description": "Enthusiastic traveler and foodie - has properties and posts",
+      "has_profile": true
+    },
+    {
+      "id": 2,
+      "username": "bob",
+      "email": "bob@example.com",
+      "password": "Admin123!",
+      "role": "admin",
+      "verified": true,
+      "description": "Software developer and musician - admin user with properties",
+      "has_profile": true
+    },
+    {
+      "id": 3,
+      "username": "charlie",
+      "email": "charlie@example.com",
+      "password": "User123!",
+      "role": "user",
+      "verified": true,
+      "description": "Book lover and aspiring writer - regular user",
+      "has_profile": true
+    },
+    {
+      "id": 4,
+      "username": "testuser",
+      "email": "test@ecohost.com",
+      "password": "Test123!",
+      "role": "user",
+      "verified": true,
+      "description": "Test user for automated testing",
+      "has_profile": true
+    }
+  ],
+  "by_role": {
+    "admin": [
+      {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "Admin123!",
+        "verified": true
+      }
+    ],
+    "user": [
+      {
+        "username": "alice",
+        "email": "alice@example.com",
+        "password": "Password123!",
+        "verified": true
+      },
+      {
+        "username": "charlie",
+        "email": "charlie@example.com",
+        "password": "User123!",
+        "verified": true
+      },
+      {
+        "username": "testuser",
+        "email": "test@ecohost.com",
+        "password": "Test123!",
+        "verified": true
+      }
+    ]
+  },
+  "test_scenarios": {
+    "basic_authentication": {
+      "description": "Test basic login and registration flow",
+      "users": ["alice@example.com", "bob@example.com"]
+    },
+    "property_management": {
+      "description": "Test property listing and management features",
+      "users": ["alice@example.com", "bob@example.com"],
+      "note": "These users have existing properties in the database"
+    },
+    "profile_management": {
+      "description": "Test profile viewing and editing",
+      "users": ["charlie@example.com", "test@ecohost.com"]
+    },
+    "guest_user": {
+      "description": "Test public-facing features without authentication",
+      "note": "Use /search, /eco-guide, /feedback endpoints without authentication"
+    }
+  },
+  "api_endpoints": {
+    "public": [
+      "GET /properties",
+      "POST /feedback"
+    ],
+    "authenticated": [
+      "GET /users/profile",
+      "PUT /users/profile",
+      "POST /inventory"
+    ],
+    "auth": [
+      "POST /auth/register",
+      "POST /auth/login",
+      "GET /auth/verify"
+    ]
+  }
+}

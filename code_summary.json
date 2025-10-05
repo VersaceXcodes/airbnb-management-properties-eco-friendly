@@ -1,0 +1,340 @@
+{
+  "project_name": "EcoHost - Airbnb Management Platform for Eco-Friendly Properties",
+  "description": "A comprehensive platform for managing eco-friendly Airbnb properties with sustainability tracking, guest management, and environmental impact analytics.",
+  "tech_stack": [
+    "React 18.3.1",
+    "TypeScript 5.5.3",
+    "Vite 5.4.0",
+    "Node.js/Express 4.19.2",
+    "PostgreSQL / PGlite",
+    "Zustand (State Management)",
+    "React Router 6.26.0",
+    "TanStack React Query 5.0.0",
+    "Tailwind CSS 3.4.8",
+    "Radix UI Components",
+    "Axios 1.7.7",
+    "Zod (Validation)",
+    "bcryptjs (Password Hashing)",
+    "JWT (Authentication)"
+  ],
+  "architecture": {
+    "frontend": {
+      "location": "/app/vitereact",
+      "framework": "React + Vite + TypeScript",
+      "state_management": "Zustand with Redux Toolkit",
+      "styling": "Tailwind CSS + Radix UI",
+      "routing": "React Router v6",
+      "api_client": "Axios with React Query"
+    },
+    "backend": {
+      "location": "/app/backend",
+      "framework": "Express.js + TypeScript",
+      "database": "PostgreSQL (production) / PGlite (development)",
+      "authentication": "JWT with bcrypt password hashing",
+      "validation": "Zod schemas",
+      "api_style": "RESTful"
+    }
+  },
+  "features": [
+    {
+      "name": "Authentication & User Management",
+      "description": "User registration, login, JWT-based authentication with persistent sessions",
+      "files": [
+        "vitereact/src/store/main.tsx",
+        "vitereact/src/components/ui/auth-dialog.tsx",
+        "vitereact/src/components/views/UV_Profile.tsx",
+        "backend/server.ts (lines 84-148)"
+      ],
+      "endpoints": [
+        "POST /auth/register",
+        "POST /auth/login",
+        "GET /auth/verify",
+        "GET /users/profile",
+        "PUT /users/profile"
+      ]
+    },
+    {
+      "name": "Landing Page",
+      "description": "Public-facing landing page with authentication dialog and feature highlights",
+      "files": [
+        "vitereact/src/components/views/UV_Landing.tsx"
+      ],
+      "routes": ["/"]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Main dashboard for property managers showing overview and key metrics",
+      "files": [
+        "vitereact/src/components/views/UV_Dashboard.tsx"
+      ],
+      "routes": ["/dashboard"],
+      "protected": true
+    },
+    {
+      "name": "Property Management",
+      "description": "Create, manage, and list eco-friendly properties with ratings",
+      "files": [
+        "vitereact/src/components/views/UV_ManageListings.tsx",
+        "vitereact/src/components/views/UV_CreateListing.tsx",
+        "vitereact/src/components/views/UV_SearchListings.tsx"
+      ],
+      "routes": ["/properties/manage", "/properties/create", "/search"],
+      "endpoints": ["GET /properties"],
+      "protected": {
+        "/properties/manage": true,
+        "/properties/create": true,
+        "/search": false
+      }
+    },
+    {
+      "name": "Eco-Rating System",
+      "description": "Rating and tracking environmental sustainability of properties",
+      "files": [
+        "vitereact/src/components/views/UV_EcoRating.tsx"
+      ],
+      "routes": ["/rating"],
+      "protected": true
+    },
+    {
+      "name": "Calendar Management",
+      "description": "Booking calendar and availability management for properties",
+      "files": [
+        "vitereact/src/components/views/UV_CalendarManagement.tsx"
+      ],
+      "routes": ["/calendar"],
+      "protected": true
+    },
+    {
+      "name": "Inventory Management",
+      "description": "Track and manage eco-friendly supplies and inventory",
+      "files": [
+        "vitereact/src/components/views/UV_InventoryManagement.tsx"
+      ],
+      "routes": ["/inventory"],
+      "endpoints": ["POST /inventory"],
+      "protected": true
+    },
+    {
+      "name": "Guest Management",
+      "description": "Communicate with and manage guest bookings",
+      "files": [
+        "vitereact/src/components/views/UV_GuestManagement.tsx"
+      ],
+      "routes": ["/guest"],
+      "protected": true
+    },
+    {
+      "name": "Sustainability Reports",
+      "description": "Generate and view sustainability and environmental impact reports",
+      "files": [
+        "vitereact/src/components/views/UV_SustainabilityReports.tsx",
+        "vitereact/src/components/views/UV_EcoImpactAnalytics.tsx"
+      ],
+      "routes": ["/reports/sustainability", "/reports/eco-impact"],
+      "protected": true
+    },
+    {
+      "name": "Eco Guide",
+      "description": "Public guide for sustainable travel and eco-friendly practices",
+      "files": [
+        "vitereact/src/components/views/UV_EcoGuide.tsx"
+      ],
+      "routes": ["/eco-guide"],
+      "protected": false
+    },
+    {
+      "name": "Feedback System",
+      "description": "Submit and manage guest feedback and reviews",
+      "files": [
+        "vitereact/src/components/views/UV_FeedbackSubmit.tsx"
+      ],
+      "routes": ["/feedback"],
+      "endpoints": ["POST /feedback"],
+      "protected": false
+    },
+    {
+      "name": "Navigation & Layout",
+      "description": "Top navigation bar and footer components",
+      "files": [
+        "vitereact/src/components/views/GV_TopNavigation.tsx",
+        "vitereact/src/components/views/GV_Footer.tsx"
+      ]
+    }
+  ],
+  "database_tables": [
+    {
+      "name": "users",
+      "purpose": "Store user accounts with authentication credentials",
+      "columns": ["id", "username", "email", "password_hash", "created_at"]
+    },
+    {
+      "name": "profiles",
+      "purpose": "Extended user profile information",
+      "columns": ["id", "user_id", "bio", "avatar_url", "created_at"]
+    },
+    {
+      "name": "properties",
+      "purpose": "Eco-friendly property listings",
+      "columns": ["id", "user_id", "name", "location", "eco_rating", "amenities", "description", "price_per_night", "image_url", "created_at"]
+    },
+    {
+      "name": "inventory",
+      "purpose": "Track eco-friendly supplies and resources",
+      "columns": ["id", "name", "quantity", "created_at"]
+    },
+    {
+      "name": "feedback",
+      "purpose": "Guest feedback and property reviews",
+      "columns": ["id", "property_id", "user_id", "feedback", "rating", "created_at"]
+    },
+    {
+      "name": "posts",
+      "purpose": "User-generated content and blog posts",
+      "columns": ["id", "user_id", "title", "content", "image_url", "created_at"]
+    },
+    {
+      "name": "comments",
+      "purpose": "Comments on posts",
+      "columns": ["id", "post_id", "user_id", "comment", "created_at"]
+    },
+    {
+      "name": "likes",
+      "purpose": "Like tracking for posts",
+      "columns": ["id", "post_id", "user_id", "created_at"]
+    }
+  ],
+  "api_endpoints": [
+    {
+      "method": "POST",
+      "path": "/auth/register",
+      "description": "Register new user account",
+      "authentication": false,
+      "request_body": {
+        "name": "string",
+        "email": "string",
+        "password": "string (min 6 chars)"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "description": "Login with email and password",
+      "authentication": false,
+      "request_body": {
+        "email": "string",
+        "password": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/auth/verify",
+      "description": "Verify JWT token and return user info",
+      "authentication": true
+    },
+    {
+      "method": "GET",
+      "path": "/users/profile",
+      "description": "Get current user's profile",
+      "authentication": true
+    },
+    {
+      "method": "PUT",
+      "path": "/users/profile",
+      "description": "Update user profile",
+      "authentication": true,
+      "request_body": {
+        "bio": "string (optional)",
+        "avatar_url": "string (optional)"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/properties",
+      "description": "Search properties with filters",
+      "authentication": false,
+      "query_params": {
+        "eco_rating_min": "number",
+        "eco_rating_max": "number",
+        "amenities": "comma-separated string",
+        "location": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/inventory",
+      "description": "Add inventory item",
+      "authentication": true,
+      "request_body": {
+        "name": "string",
+        "quantity": "number"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/feedback",
+      "description": "Submit property feedback",
+      "authentication": false,
+      "request_body": {
+        "property_id": "number",
+        "user_id": "number",
+        "feedback": "string"
+      }
+    }
+  ],
+  "environment_variables": {
+    "frontend": {
+      "VITE_API_BASE_URL": "Backend API URL",
+      "NODE_ENV": "Environment (production/development)"
+    },
+    "backend": {
+      "USE_PGLITE": "Use PGlite for local development (true/false)",
+      "DATABASE_URL": "PostgreSQL connection string (production)",
+      "PGHOST": "PostgreSQL host",
+      "PGDATABASE": "Database name",
+      "PGUSER": "Database user",
+      "PGPASSWORD": "Database password",
+      "PGPORT": "Database port (default: 5432)",
+      "JWT_SECRET": "Secret key for JWT signing",
+      "PORT": "Server port (default: 3000)"
+    }
+  },
+  "key_libraries": {
+    "ui_components": [
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-toast"
+    ],
+    "form_handling": [
+      "react-hook-form",
+      "@hookform/resolvers",
+      "zod"
+    ],
+    "data_fetching": [
+      "@tanstack/react-query",
+      "axios"
+    ],
+    "state_management": [
+      "zustand",
+      "redux-persist",
+      "@reduxjs/toolkit"
+    ],
+    "backend": [
+      "express",
+      "cors",
+      "morgan",
+      "jsonwebtoken",
+      "bcryptjs",
+      "pg",
+      "@electric-sql/pglite"
+    ]
+  },
+  "deployment": {
+    "platform": "Fly.io",
+    "frontend_url": "https://123airbnb-management-properties-eco-friendly.launchpulse.ai",
+    "backend_url": "https://123airbnb-management-properties-eco-friendly.launchpulse.ai",
+    "single_server_mode": true,
+    "notes": "Frontend and backend are served from the same domain. Backend serves static frontend files."
+  }
+}
