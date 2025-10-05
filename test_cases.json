@@ -1,0 +1,655 @@
+{
+  "project_name": "EcoHost - Eco-Friendly Airbnb Management Platform",
+  "base_url": "https://123airbnb-management-properties-eco-friendly.launchpulse.ai",
+  "test_execution_date": "2025-01-20",
+  "total_test_cases": 30,
+  "testCases": [
+    {
+      "id": "functional-app-test",
+      "name": "Functional Application Test",
+      "category": "functionality",
+      "priority": "critical",
+      "description": "Verify the application has actual functionality beyond basic placeholder",
+      "steps": [
+        "Navigate to application root URL",
+        "Verify page loads without errors",
+        "Check for multiple interactive elements (buttons, forms, links)",
+        "Verify proper navigation structure exists",
+        "Confirm application has real features, not just placeholder text"
+      ],
+      "expectedOutcome": "Application shows functional features including landing page with auth dialog, property search, and navigation",
+      "failureCondition": "If page only shows 'Vite + React' placeholder or has no interactive components"
+    },
+    {
+      "id": "landing-page-load",
+      "name": "Landing Page Load Test",
+      "category": "ui",
+      "priority": "critical",
+      "description": "Verify landing page loads correctly with all content",
+      "steps": [
+        "Navigate to '/'",
+        "Verify 'Welcome to EcoHost!' heading is visible",
+        "Check for 'Core Features' section",
+        "Verify 'Login / Sign Up' button is present",
+        "Check for 'Browse Properties' button",
+        "Verify 'Success Stories' section exists"
+      ],
+      "expectedOutcome": "Landing page displays with all sections and functional buttons",
+      "testData": {
+        "url": "/",
+        "expectedHeadings": ["Welcome to EcoHost!", "Core Features", "Success Stories"],
+        "expectedFeatures": ["Eco-Rating System", "Sustainability Reporting", "Green Inventory Management", "Enhanced Guest Communications"]
+      }
+    },
+    {
+      "id": "auth-dialog-open",
+      "name": "Authentication Dialog Opens",
+      "category": "authentication",
+      "priority": "high",
+      "description": "Verify authentication dialog opens when clicking login button",
+      "steps": [
+        "Navigate to landing page",
+        "Click 'Login / Sign Up' button",
+        "Verify dialog opens with login and sign up tabs",
+        "Check that email and password fields are present",
+        "Verify both 'Login' and 'Sign Up' tabs are clickable"
+      ],
+      "expectedOutcome": "Authentication dialog opens with proper form fields and tab navigation"
+    },
+    {
+      "id": "user-registration",
+      "name": "User Registration Flow",
+      "category": "authentication",
+      "priority": "critical",
+      "description": "Test new user registration with valid credentials",
+      "steps": [
+        "Open authentication dialog",
+        "Switch to 'Sign Up' tab",
+        "Enter name: 'New User'",
+        "Enter email: 'newuser@test.com'",
+        "Enter password: 'NewPass123!'",
+        "Click 'Sign Up' button",
+        "Verify successful registration",
+        "Check redirect to dashboard or landing page",
+        "Verify user is logged in"
+      ],
+      "expectedOutcome": "User successfully registers and is automatically logged in",
+      "testData": {
+        "endpoint": "/auth/register",
+        "method": "POST",
+        "requestBody": {
+          "name": "New User",
+          "email": "newuser@test.com",
+          "password": "NewPass123!"
+        }
+      }
+    },
+    {
+      "id": "user-login-alice",
+      "name": "User Login - Alice",
+      "category": "authentication",
+      "priority": "critical",
+      "description": "Test login with existing user credentials (alice)",
+      "steps": [
+        "Open authentication dialog",
+        "Ensure 'Login' tab is selected",
+        "Enter email: 'alice@example.com'",
+        "Enter password: 'Password123!'",
+        "Click 'Login' button",
+        "Verify successful login",
+        "Check that authentication token is stored",
+        "Verify redirect to dashboard or authenticated state"
+      ],
+      "expectedOutcome": "User successfully logs in and gains access to protected routes",
+      "testData": {
+        "email": "alice@example.com",
+        "password": "Password123!",
+        "expectedRole": "user"
+      }
+    },
+    {
+      "id": "user-login-bob",
+      "name": "User Login - Bob (Admin)",
+      "category": "authentication",
+      "priority": "high",
+      "description": "Test login with admin user credentials",
+      "steps": [
+        "Open authentication dialog",
+        "Enter email: 'bob@example.com'",
+        "Enter password: 'Admin123!'",
+        "Click 'Login' button",
+        "Verify successful login",
+        "Check admin privileges if applicable"
+      ],
+      "expectedOutcome": "Admin user successfully logs in with appropriate permissions",
+      "testData": {
+        "email": "bob@example.com",
+        "password": "Admin123!",
+        "expectedRole": "admin"
+      }
+    },
+    {
+      "id": "invalid-login",
+      "name": "Invalid Login Attempt",
+      "category": "authentication",
+      "priority": "high",
+      "description": "Verify proper error handling for invalid credentials",
+      "steps": [
+        "Open authentication dialog",
+        "Enter email: 'invalid@test.com'",
+        "Enter password: 'wrongpassword'",
+        "Click 'Login' button",
+        "Verify error message is displayed",
+        "Confirm user is not logged in"
+      ],
+      "expectedOutcome": "Error message displayed, user remains unauthenticated",
+      "testData": {
+        "email": "invalid@test.com",
+        "password": "wrongpassword",
+        "expectedError": "Invalid email or password"
+      }
+    },
+    {
+      "id": "navigation-authenticated",
+      "name": "Navigation Bar - Authenticated User",
+      "category": "ui",
+      "priority": "high",
+      "description": "Verify navigation menu shows all links for authenticated users",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Verify top navigation is visible",
+        "Check for 'Home' link",
+        "Check for 'Properties' link",
+        "Check for 'Reports' link (authenticated only)",
+        "Check for 'Messages' link (authenticated only)",
+        "Check for 'Account' link"
+      ],
+      "expectedOutcome": "All navigation links are visible and clickable for authenticated users"
+    },
+    {
+      "id": "navigation-unauthenticated",
+      "name": "Navigation Bar - Unauthenticated User",
+      "category": "ui",
+      "priority": "medium",
+      "description": "Verify navigation menu for unauthenticated users",
+      "precondition": "User must be logged out",
+      "steps": [
+        "Navigate to landing page without authentication",
+        "Verify top navigation is visible",
+        "Check that 'Reports' and 'Messages' links are hidden",
+        "Verify public links are still accessible"
+      ],
+      "expectedOutcome": "Only public navigation links are visible to unauthenticated users"
+    },
+    {
+      "id": "dashboard-access",
+      "name": "Dashboard Access - Protected Route",
+      "category": "routing",
+      "priority": "critical",
+      "description": "Verify dashboard is accessible only to authenticated users",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/dashboard'",
+        "Verify dashboard page loads",
+        "Check for dashboard content and widgets",
+        "Logout",
+        "Try to access '/dashboard' again",
+        "Verify redirect to landing page or login"
+      ],
+      "expectedOutcome": "Dashboard accessible when authenticated, redirects when not authenticated"
+    },
+    {
+      "id": "profile-view",
+      "name": "View User Profile",
+      "category": "profile",
+      "priority": "high",
+      "description": "Test viewing user profile information",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/profile'",
+        "Verify profile page loads",
+        "Check that bio field shows: 'Enthusiastic traveler and foodie.'",
+        "Verify avatar URL is displayed",
+        "Check that form fields are editable"
+      ],
+      "expectedOutcome": "Profile page displays user information correctly",
+      "testData": {
+        "user": "alice@example.com",
+        "expectedBio": "Enthusiastic traveler and foodie.",
+        "expectedAvatar": "https://picsum.photos/seed/1/200"
+      }
+    },
+    {
+      "id": "profile-update",
+      "name": "Update User Profile",
+      "category": "profile",
+      "priority": "high",
+      "description": "Test updating user profile information",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as charlie@example.com",
+        "Navigate to '/profile'",
+        "Update bio to: 'Updated bio for testing'",
+        "Update avatar URL to: 'https://picsum.photos/seed/test/200'",
+        "Click 'Update Profile' button",
+        "Verify success message or confirmation",
+        "Refresh page and verify changes persisted"
+      ],
+      "expectedOutcome": "Profile updates successfully and changes are saved",
+      "testData": {
+        "endpoint": "/users/profile",
+        "method": "PUT",
+        "requestBody": {
+          "bio": "Updated bio for testing",
+          "avatar_url": "https://picsum.photos/seed/test/200"
+        }
+      }
+    },
+    {
+      "id": "properties-search-public",
+      "name": "Public Property Search",
+      "category": "properties",
+      "priority": "high",
+      "description": "Test property search functionality without authentication",
+      "steps": [
+        "Navigate to '/search'",
+        "Verify property search page loads",
+        "Check that properties are displayed or search form is available",
+        "Verify page is accessible without login"
+      ],
+      "expectedOutcome": "Property search is accessible to public users",
+      "testData": {
+        "url": "/search",
+        "authRequired": false
+      }
+    },
+    {
+      "id": "properties-filter-eco-rating",
+      "name": "Filter Properties by Eco Rating",
+      "category": "properties",
+      "priority": "medium",
+      "description": "Test filtering properties by eco rating",
+      "steps": [
+        "Navigate to '/search'",
+        "Set eco rating filter to minimum 4.5",
+        "Apply filter",
+        "Verify only properties with eco rating >= 4.5 are shown",
+        "Check that 'Green Mountain Retreat' (4.5) appears",
+        "Check that 'Eco Villa Paradise' (4.8) appears"
+      ],
+      "expectedOutcome": "Properties are filtered correctly by eco rating",
+      "testData": {
+        "endpoint": "/properties",
+        "queryParams": {
+          "eco_rating_min": 4.5
+        },
+        "expectedProperties": ["Green Mountain Retreat", "Eco Villa Paradise", "Solar Powered Beach House"]
+      }
+    },
+    {
+      "id": "properties-filter-location",
+      "name": "Filter Properties by Location",
+      "category": "properties",
+      "priority": "medium",
+      "description": "Test filtering properties by location",
+      "steps": [
+        "Navigate to '/search'",
+        "Enter location filter: 'Costa Rica'",
+        "Apply filter",
+        "Verify only properties in Costa Rica are shown",
+        "Check that 'Solar Powered Beach House' appears"
+      ],
+      "expectedOutcome": "Properties are filtered correctly by location",
+      "testData": {
+        "endpoint": "/properties",
+        "queryParams": {
+          "location": "Costa Rica"
+        },
+        "expectedCount": 1
+      }
+    },
+    {
+      "id": "properties-manage",
+      "name": "Manage Property Listings",
+      "category": "properties",
+      "priority": "high",
+      "description": "Access property management page",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/properties/manage'",
+        "Verify property management page loads",
+        "Check that user's properties are displayed",
+        "Verify edit/delete options are available"
+      ],
+      "expectedOutcome": "Property management page shows user's listings with management options"
+    },
+    {
+      "id": "properties-create",
+      "name": "Create New Property Listing",
+      "category": "properties",
+      "priority": "high",
+      "description": "Test creating a new property listing",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as testuser",
+        "Navigate to '/properties/create'",
+        "Verify create listing form is displayed",
+        "Fill in property name: 'Test Eco Lodge'",
+        "Fill in location: 'Portland, Oregon'",
+        "Set eco rating: 4.7",
+        "Add amenities: 'solar panels, composting'",
+        "Fill in description",
+        "Submit form",
+        "Verify success message or redirect"
+      ],
+      "expectedOutcome": "New property listing is created successfully"
+    },
+    {
+      "id": "eco-rating-view",
+      "name": "View Eco Rating Page",
+      "category": "sustainability",
+      "priority": "medium",
+      "description": "Access eco rating feature",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as bob@example.com",
+        "Navigate to '/rating'",
+        "Verify eco rating page loads",
+        "Check for rating information or calculator"
+      ],
+      "expectedOutcome": "Eco rating page displays with relevant sustainability metrics"
+    },
+    {
+      "id": "inventory-add",
+      "name": "Add Inventory Item",
+      "category": "inventory",
+      "priority": "medium",
+      "description": "Test adding items to inventory management",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/inventory'",
+        "Verify inventory management page loads",
+        "Add new item: 'Bamboo Toothbrushes'",
+        "Set quantity: 100",
+        "Submit form",
+        "Verify item appears in inventory list"
+      ],
+      "expectedOutcome": "Inventory item is added successfully",
+      "testData": {
+        "endpoint": "/inventory",
+        "method": "POST",
+        "requestBody": {
+          "name": "Bamboo Toothbrushes",
+          "quantity": 100
+        }
+      }
+    },
+    {
+      "id": "calendar-access",
+      "name": "Calendar Management Access",
+      "category": "booking",
+      "priority": "medium",
+      "description": "Access calendar management feature",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as bob@example.com",
+        "Navigate to '/calendar'",
+        "Verify calendar management page loads",
+        "Check for calendar view or booking interface"
+      ],
+      "expectedOutcome": "Calendar management page displays correctly"
+    },
+    {
+      "id": "guest-management",
+      "name": "Guest Management Access",
+      "category": "communication",
+      "priority": "medium",
+      "description": "Access guest communication and management",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/guest'",
+        "Verify guest management page loads",
+        "Check for messaging or guest list interface"
+      ],
+      "expectedOutcome": "Guest management page displays with communication tools"
+    },
+    {
+      "id": "sustainability-reports",
+      "name": "View Sustainability Reports",
+      "category": "reporting",
+      "priority": "medium",
+      "description": "Access sustainability reporting feature",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as bob@example.com",
+        "Navigate to '/reports/sustainability'",
+        "Verify sustainability reports page loads",
+        "Check for report data or charts"
+      ],
+      "expectedOutcome": "Sustainability reports page displays with environmental metrics"
+    },
+    {
+      "id": "eco-impact-analytics",
+      "name": "View Eco Impact Analytics",
+      "category": "reporting",
+      "priority": "medium",
+      "description": "Access environmental impact analytics",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/reports/eco-impact'",
+        "Verify eco impact analytics page loads",
+        "Check for charts or data visualizations"
+      ],
+      "expectedOutcome": "Eco impact analytics page displays with relevant metrics"
+    },
+    {
+      "id": "eco-guide-public",
+      "name": "Public Eco Guide Access",
+      "category": "content",
+      "priority": "low",
+      "description": "Verify eco guide is publicly accessible",
+      "steps": [
+        "Navigate to '/eco-guide' without authentication",
+        "Verify eco guide page loads",
+        "Check for sustainability tips and information",
+        "Confirm no authentication required"
+      ],
+      "expectedOutcome": "Eco guide is accessible to all users without login"
+    },
+    {
+      "id": "feedback-submit-public",
+      "name": "Submit Public Feedback",
+      "category": "feedback",
+      "priority": "medium",
+      "description": "Test feedback submission without authentication",
+      "steps": [
+        "Navigate to '/feedback'",
+        "Verify feedback form is accessible",
+        "Fill in property ID: 1",
+        "Fill in user ID: 1",
+        "Enter feedback: 'Great eco-friendly experience!'",
+        "Submit feedback",
+        "Verify success message"
+      ],
+      "expectedOutcome": "Feedback is submitted successfully without requiring login",
+      "testData": {
+        "endpoint": "/feedback",
+        "method": "POST",
+        "requestBody": {
+          "property_id": 1,
+          "user_id": 1,
+          "feedback": "Great eco-friendly experience!"
+        }
+      }
+    },
+    {
+      "id": "protected-route-redirect",
+      "name": "Protected Route Redirect Test",
+      "category": "security",
+      "priority": "critical",
+      "description": "Verify unauthenticated users are redirected from protected routes",
+      "steps": [
+        "Ensure user is logged out",
+        "Try to navigate to '/dashboard'",
+        "Verify redirect to '/' (landing page)",
+        "Try to navigate to '/properties/manage'",
+        "Verify redirect to landing page",
+        "Try to navigate to '/inventory'",
+        "Verify redirect to landing page"
+      ],
+      "expectedOutcome": "All protected routes redirect unauthenticated users to landing page"
+    },
+    {
+      "id": "session-persistence",
+      "name": "Session Persistence After Refresh",
+      "category": "authentication",
+      "priority": "high",
+      "description": "Verify user session persists after page refresh",
+      "steps": [
+        "Login as alice@example.com",
+        "Navigate to '/dashboard'",
+        "Refresh the page",
+        "Verify user is still authenticated",
+        "Check that dashboard remains accessible",
+        "Verify user data is still loaded"
+      ],
+      "expectedOutcome": "User session persists across page refreshes"
+    },
+    {
+      "id": "logout-functionality",
+      "name": "User Logout",
+      "category": "authentication",
+      "priority": "high",
+      "description": "Test user logout functionality",
+      "precondition": "User must be logged in",
+      "steps": [
+        "Login as charlie@example.com",
+        "Locate logout button or option",
+        "Click logout",
+        "Verify user is logged out",
+        "Check redirect to landing page",
+        "Verify protected routes are no longer accessible",
+        "Confirm authentication token is cleared"
+      ],
+      "expectedOutcome": "User successfully logs out and session is cleared"
+    },
+    {
+      "id": "responsive-mobile-view",
+      "name": "Responsive Design - Mobile View",
+      "category": "ui",
+      "priority": "medium",
+      "description": "Verify application is responsive on mobile devices",
+      "steps": [
+        "Set viewport to mobile size (375x667)",
+        "Navigate to landing page",
+        "Verify layout adapts to mobile screen",
+        "Check that navigation is mobile-friendly",
+        "Test auth dialog on mobile",
+        "Verify buttons and forms are usable"
+      ],
+      "expectedOutcome": "Application displays correctly and is functional on mobile devices"
+    },
+    {
+      "id": "error-handling-500",
+      "name": "Server Error Handling",
+      "category": "error-handling",
+      "priority": "low",
+      "description": "Verify graceful handling of server errors",
+      "steps": [
+        "Simulate server error or network failure",
+        "Attempt an API call",
+        "Verify error message is displayed to user",
+        "Check that application doesn't crash",
+        "Confirm user can recover from error"
+      ],
+      "expectedOutcome": "Application handles server errors gracefully with user-friendly messages"
+    },
+    {
+      "id": "footer-display",
+      "name": "Footer Component Display",
+      "category": "ui",
+      "priority": "low",
+      "description": "Verify footer is displayed on all pages",
+      "steps": [
+        "Navigate to landing page",
+        "Scroll to bottom and verify footer exists",
+        "Navigate to dashboard (authenticated)",
+        "Verify footer is still present",
+        "Check footer on various other pages"
+      ],
+      "expectedOutcome": "Footer component displays consistently across all pages"
+    }
+  ],
+  "test_suites": {
+    "critical_path": {
+      "description": "Essential user flows that must work",
+      "test_cases": [
+        "functional-app-test",
+        "landing-page-load",
+        "user-registration",
+        "user-login-alice",
+        "dashboard-access",
+        "protected-route-redirect"
+      ]
+    },
+    "authentication": {
+      "description": "All authentication-related tests",
+      "test_cases": [
+        "auth-dialog-open",
+        "user-registration",
+        "user-login-alice",
+        "user-login-bob",
+        "invalid-login",
+        "session-persistence",
+        "logout-functionality"
+      ]
+    },
+    "property_management": {
+      "description": "Property listing and management tests",
+      "test_cases": [
+        "properties-search-public",
+        "properties-filter-eco-rating",
+        "properties-filter-location",
+        "properties-manage",
+        "properties-create"
+      ]
+    },
+    "user_profile": {
+      "description": "User profile management tests",
+      "test_cases": [
+        "profile-view",
+        "profile-update"
+      ]
+    },
+    "sustainability_features": {
+      "description": "Eco-rating and sustainability features",
+      "test_cases": [
+        "eco-rating-view",
+        "sustainability-reports",
+        "eco-impact-analytics",
+        "eco-guide-public"
+      ]
+    },
+    "smoke_test": {
+      "description": "Quick smoke test for basic functionality",
+      "test_cases": [
+        "functional-app-test",
+        "landing-page-load",
+        "user-login-alice",
+        "dashboard-access"
+      ]
+    }
+  },
+  "notes": {
+    "test_environment": "Production URL on Fly.io",
+    "authentication_required": "Many features require authentication. Use test credentials from test_users.json",
+    "database_state": "Tests assume database is seeded with initial data from db.sql",
+    "known_issues": []
+  }
+}

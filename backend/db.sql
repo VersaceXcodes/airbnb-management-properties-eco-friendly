@@ -72,10 +72,10 @@ CREATE TABLE IF NOT EXISTS feedback (
 -- Seed the database
 
 INSERT INTO users (username, email, password_hash) VALUES
-('alice', 'alice@example.com', '$2a$10$YTj5zRjuAMJc6MIvWJCp2uTVKVIHV1IpDeURGkX4uSmz8DJ.DPW/G'),
-('bob', 'bob@example.com', '$2a$10$FVjNV7KbO708v66Cj8Z6HeJ666ZDIQc11k7g15FY4t91PFMtaG0/e'),
-('charlie', 'charlie@example.com', '$2a$10$IVcPaiCvPRvPmuPfm7jBDOY9igH.NLcfCqWAFsuqSpk2nW9KSIPCi'),
-('testuser', 'test@ecohost.com', '$2a$10$c2gncm1KPpCYxj.BlDWW2.ZlYs7pZSHosTifkRmFI0o0XDzlMDVMO')
+('alice', 'alice@example.com', '$2a$10$Se0o/5lkr4J9pqwrWRqPi.5BCPVzNGw7CxRbMC8X3fkjL0hPFBRgm'),
+('bob', 'bob@example.com', '$2a$10$49Fptd.ZtaM6GaIgXSigF.1jlBkS8yjvBiqd34uYnPFcRySbI/mRS'),
+('charlie', 'charlie@example.com', '$2a$10$tGBJCVo4dKMNImRGWwavyuvg2J5LyGnvbZn6U3jzlwJ3vDOyiY0cK'),
+('testuser', 'test@ecohost.com', '$2a$10$RpmFs8Yl8c1/h4DGNzekXerVXKBT8RPap3LpEwYvK6dk/7tElW1oC')
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO profiles (user_id, bio, avatar_url) VALUES
